@@ -52,8 +52,8 @@ live scores, and more.
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/zytronium/aeroduel_backend.git
-   cd aeroduel_backend
+   git clone https://github.com/Aeroduel/server.git
+   cd server
    ```
 
 2. **Install dependencies:**
