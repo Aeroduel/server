@@ -30,8 +30,8 @@ async function createWindow() {
     : path.join(process.resourcesPath, "standalone", "public", "logo.png");
 
   win = new BrowserWindow({
-    width: 1080,
-    height: 720,
+    width: 1200,
+    height: 900,
     icon: iconPath,
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
