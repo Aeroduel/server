@@ -8,19 +8,34 @@ export default function Home() {
   const [liveMessage, setLiveMessage] = useState("");
   const timeoutRef = useRef<number | null>(null);
 
-  function startMatch() {
+  async function startMatch() {
     if (loading)
       return;
 
     setLoading(true);
-    setLiveMessage("Starting - Coming Soon...");
+    setLiveMessage("Starting match…");
 
-    // restore button after 1.5s
+    try {
+      const response = await fetch("http://aeroduel.local:45045/api/new-match", { /* todo: use `process.env.PORT | 45045` somehow */
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ action: "start" })
+      });
+
+      const data = await response.json();
+      setLiveMessage("Response: " + JSON.stringify(data));
+    } catch (err) {
+      setLiveMessage("Error contacting server");
+    }
+
     timeoutRef.current = window.setTimeout(() => {
       setLoading(false);
       setLiveMessage("");
     }, 1500);
   }
+
 
   useEffect(() => {
     return () => {

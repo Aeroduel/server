@@ -1,3 +1,5 @@
+// Returns aeroduel.local-based URLs by default, with a fallback to the detected local IP.
+
 import { NextResponse } from "next/server";
 import { MatchState } from '@/types';
 import { getCurrentMatch, updateCurrentMatch } from '@/lib/match-state';
@@ -61,8 +63,13 @@ export async function POST(req: Request) {
 
   // Set server URL and WebSocket URL
   const port: string | number = process.env.PORT || 45045; // Port 45045 because it has an extremely low chance of being used by other apps
-  const serverUrl = `http://${localIp}:${port}`;           // If you change the port, a port in range 45000–48000 is recommended.
-  const wsUrl = `ws://${localIp}:${port}`;
+                                                           // If you change the port, a port in range 45000–48000 is recommended.
+  // Prefer mDNS name aeroduel.local for discovery; fall back to local IP when necessary.
+  const mdnsName = process.env.MDNS_NAME || "aeroduel.local";
+  const serverHost = mdnsName || localIp;
+
+  const serverUrl = `http://${serverHost}:${port}`;
+  const wsUrl = `ws://${serverHost}:${port}`;
 
   // Create new match
   const matchId = generateMatchId();
@@ -78,11 +85,11 @@ export async function POST(req: Request) {
     registeredPlanes: [],
     maxPlayers,
     serverUrl,
-    wsUrl
+    wsUrl,
+    localIp // for clients that cannot resolve mDNS
   }));
 
-  // Generate QR code data
-  const qrCodeData = `aeroduel://join?ip=${localIp}&port=${port}&pin=${gamePin}`;
+  const qrCodeData = `aeroduel://join?host=${encodeURIComponent(serverHost)}&port=${port}&pin=${gamePin}`;
 
   return NextResponse.json({
     success: true,
@@ -96,7 +103,8 @@ export async function POST(req: Request) {
       serverUrl,
       wsUrl,
       qrCodeData,
-      registeredPlanes: []
+      registeredPlanes: [],
+      localIp // useful fallback for diagnostic UI / QR payloads
     }
   });
 }
