@@ -37,6 +37,10 @@ Next.js API triggered from a single click in the frontend.
 read data but do not allow clients to write, not even when joining matches (the server will handle that if the 
 endpoint for joining a match does not fail).
 
+### Documentation
+Write up a detailed markdown API.md for the server endpoints. This helps other developers understand the server
+when forking and editing the code, perhaps even to use the API in their own projects.
+
 ## Todo
 
 ### RC Plane Registration/Linking
