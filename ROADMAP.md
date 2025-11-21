@@ -69,5 +69,4 @@ WebSocket implementation for phone controllers.
 - Create a WebSocket server
 - Consider protecting the API endpoints with authentication
 - Add CI/CD
-- Add unittesting
-- 
+- Add unit testing
