@@ -131,12 +131,11 @@ aeroduel_backend/
 
 - [x] **Core Server Architecture:** Next.js running inside Electron.
 - [x] **Production Packaging:** Native binaries for Linux/Windows/Mac.
-- [ ] **Local Server Hosting:** Next.js API triggered from a single click in the frontend.
+- [X] **Local Server Hosting:** Next.js API available via LAN at `aeroduel.local:45045` at all times
 - [ ] **Plane Registration/Linking** Let users register their planes and link the physical plane's software with the
   local server during a match.
 - [ ] **Game Logic Implementation:** Hit processing and score tracking.
 - [ ] **Mobile Integration:** WebSocket implementation for phone controllers.
-- [ ] **Database Integration:** MongoDB/PostgreSQL for match state.
 
 ## License
 
@@ -147,7 +146,7 @@ Distributed under the MIT License. See [LICENSE](LICENSE) for more information.
 ### Backend Team
 
 - ["Zytronium"](https://github.com/Zytronium)
-- [](https://github.com/Aeroduel)
+- [Tristan Davis](https://github.com/TebariousBag)
 
 ### Aeroduel Team
 
