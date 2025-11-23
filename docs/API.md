@@ -33,17 +33,20 @@ This auth token is given to the ESP32 in the response to `POST /api/register`.
 
 ### POST `/api/new-match`
 
-Creates a new Aeroduel match in "waiting" state.
+Creates a new Aeroduel match in "waiting" state. Requires an encrypted server token,
+which only the server knows. This prevents other entities from creating new matches.
 
 **Request Body:**
 ```json
 {
+  "serverToken": "some-unique-token",
   "duration": 420,      // Optional: Match duration in seconds (default: 420 (7 minutes))
   "maxPlayers": 2       // Optional: Maximum players (default: 2)
 }
 ```
 
 **Validation:**
+- `serverToken`: matches the server token stored in memory once decrypted.
 - `duration`: 30-1800 seconds (30 seconds to 30 minutes)
 - `maxPlayers`: 2-16 players (you probably shouldn't increase this limit, just to keep the game safe)
 
@@ -58,10 +61,11 @@ Creates a new Aeroduel match in "waiting" state.
     "matchType": "timed",
     "duration": 420,
     "maxPlayers": 2,
-    "serverUrl": "http://192.168.1.5:45045",
-    "wsUrl": "ws://192.168.1.5:45045",
-    "qrCodeData": "aeroduel://join?ip=192.168.1.5&port=45045&pin=123456",
-    "registeredPlanes": []
+    "serverUrl": "http://aeroduel.local:45045",
+    "wsUrl": "ws://aeroduel.local:45045",
+    "qrCodeData": "aeroduel://join?host=aeroduel.local&port=45045&pin=123456",
+    "registeredPlanes": [],
+    "localIp": "192.168.1.5"
   }
 }
 ```
@@ -110,24 +114,26 @@ Creates a new Aeroduel match in "waiting" state.
 
 **Example:**
 ```bash
-curl -X POST http://192.168.1.5:45045/api/new-match \
+curl -X POST http://aeroduel.local:45045/api/new-match \
   -H "Content-Type: application/json" \
   -d '{"duration": 300, "maxPlayers": 3}'
 ```
 
 ---
 
-### POST `/api/join-match` _<small>(Coming Soon)</small>_
+### POST `/api/register` _<small>(Coming Soon)</small>_
 
-Registers a plane to join the current match.
+Registers that a plane is online. Called when a plane's ESP32 is powered on and
+the LoRa connects to the WiFi network.
+
+## Planned Body and Responses
 
 **Request Body:**
 ```json
 {
-  "gamePin": "123456",
   "planeId": "uuid-of-plane",
-  "playerName": "Player 1",
-  "esp32Ip": "192.168.1.101"
+  "esp32Ip": "192.168.1.101",
+  "userId": "uuid-of-linked-user-account-or-null"
 }
 ```
 
@@ -135,11 +141,33 @@ Registers a plane to join the current match.
 ```json
 {
   "success": true,
-  "plane": {
-    "planeId": "uuid-of-plane",
-    "playerName": "Player 1",
-    "registeredAt": "2025-11-21T12:00:00Z"
-  }
+  "authToken": "some-authentication-token",
+  "matchId": "a1b2c3d4e5f6..."
+}
+```
+
+---
+
+### POST `/api/join-match` _<small>(Coming Soon)</small>_
+
+Adds a plane to the current match's waiting room.
+
+## Planned Body and Responses
+
+**Request Body:**
+```json
+{
+  "authToken": "some-authentication-token",
+  "gamePin": "123456",
+  "planeId": "uuid-of-plane",
+  "playerName": "Player 1"
+}
+```
+
+**Success Response (200):**
+```json
+{
+  "success": true
 }
 ```
 
@@ -147,12 +175,15 @@ Registers a plane to join the current match.
 
 ### POST `/api/start-match` _<small>(Coming Soon)</small>_
 
-Starts the match timer if all conditions are met.
+Begins the current match stored in memory if not started yet and if there are
+at least 2 players joined so far. 
+
+## Planned Body and Responses
 
 **Request Body:**
 ```json
 {
-  "matchId": "a1b2c3d4e5f6..."
+  "serverToken": "some-server-token"
 }
 ```
 
@@ -174,11 +205,13 @@ Starts the match timer if all conditions are met.
 
 ESP32 reports a hit event.
 
+## Planned Body and Responses
+
 **Request Body:**
 ```json
 {
-  "targetPlaneId": "uuid-of-hit-plane",
-  "attackingPlaneId": "uuid-of-this-plane",
+  "planeId": "uuid-of-this-plane",
+  "targetId": "uuid-of-hit-plane",
   "timestamp": "2025-11-21T12:05:30Z"
 }
 ```
@@ -186,8 +219,7 @@ ESP32 reports a hit event.
 **Success Response (200):**
 ```json
 {
-  "success": true,
-  "hitRegistered": true
+  "success": true
 }
 ```
 
@@ -199,7 +231,7 @@ Real-time communication for match updates.
 
 **Connection:**
 ```javascript
-const ws = new WebSocket('ws://192.168.1.5:45045');
+const ws = new WebSocket('ws://aeroduel.local:45045');
 ```
 
 **Events:**
@@ -315,13 +347,31 @@ Common HTTP status codes:
 
 ---
 
+## Current Endpoints
+- `POST /api/new-match` - Creates a new game match waiting room
+  - If one doesn't exist already, this creates a new match in memory, but doesn't start it yet
+  - INPUT: `{ serverToken, duration, maxPlayers }`
+  - OUTPUT: `{ sucess, match }`
+
 ## Future Endpoints
 - `POST /api/register` - Tells the server this plane is online and active
-  - Creates a plane ID and an OAuth token for that plane.
-  - INPUT: none or possibly a unique plane UUID that this specific ESP32 always has even after rebooting.
-  - OUTPUT: `{ planeId, authToken, matchId }`
+  - Creates an OAuth token for that plane.
+  - Only the ESP32s should make requests to this endpoint
+  - INPUT: `{ planeId, esp32Ip, userId }`
+  - OUTPUT: `{ success, authToken, matchId }`
+- `POST /api/join-match` - Adds a plane to the match waiting room
+  - Sends a WebSocket update to the mobile app updating the list of joined players
+  - Only the mobile app should make requests to this endpoint
+  - INPUT: `{ authToken, gamePin, planeId, playerName }`
+  - OUTPUT: `success`
+- `POST /api/start-match` - Begins an Aeroduel match
+  - Updates the match in memory to be active and sends WebSocket updates to ESP32s and mobile apps
+  - Only the sever's front-end can make requests to this endpoint, and this is enforced
+  - INPUT: `serverToken` 
+  - OUTPUT: `success, match`
 - `POST /api/hit` - Registers a hit during the match
-  - INPUT: `{ authToken, planeId, targetId }`
+  - Only the ESP32s should make requests to this endpoint, as enforced by the auth token.
+  - INPUT: `{ authToken, planeId, targetId, timestamp }`
   - OUTPUT: `success`
 
 ## Possible Additional Future Endpoints
@@ -329,7 +379,6 @@ Common HTTP status codes:
 - `GET /api/match/:id` - Get match details
 - `DELETE /api/match/:id` - Cancel/end match
 - `GET /api/planes` - List registered planes
-- `DELETE /api/plane/:id` - Unregister plane
 
 ---
 
@@ -342,4 +391,4 @@ Common HTTP status codes:
 ---
 
 **Documentation Created**: November 21, 2025
-**Last Updated**: November 21, 2025  
+**Last Updated**: November 23, 2025
