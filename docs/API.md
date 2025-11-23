@@ -307,14 +307,22 @@ Common HTTP status codes:
 
 ## Network Requirements
 
-- **Desktop Server** and **Mobile Apps** must be on the same WiFi network. This can be a mobile hotspot, so there's no need to bring a WiFi router to the airfield.
-- **ESP32s** must be on the same WiFi network
-- Server auto-detects local IP address
-- Default port: `45045` (configurable via `PORT` env variable)
+- **Desktop Server**, **Mobile Apps**, and **ESP32s** must be on the same WiFi network. This can be a mobile hotspot, so there's no need to bring a WiFi router to the airfield.
+- Server auto-detects local IP address and publishes it as aeroduel.local via mDNS. Ensure mDNS is not blocked by your firewall.
+- Default port: `45045` (configurable via `PORT` env variable). If you change this, the ESP32s and mobile app must also be programmed to know the new port.
 
 ---
 
-## Possible Future Endpoints
+## Future Endpoints
+- `POST /api/register` - Tells the server this plane is online and active
+  - Creates a plane ID and an OAuth token for that plane.
+  - INPUT: none or possibly a unique plane UUID that this specific ESP32 always has even after rebooting.
+  - OUTPUT: `{ planeId, authToken, matchId }`
+- `POST /api/hit` - Registers a hit during the match
+  - INPUT: `{ authToken, planeId, targetId }`
+  - OUTPUT: `success`
+
+## Possible Additional Future Endpoints
 
 - `GET /api/match/:id` - Get match details
 - `DELETE /api/match/:id` - Cancel/end match

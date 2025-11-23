@@ -16,7 +16,7 @@ export default function Home() {
     setLiveMessage("Starting match…");
 
     try {
-      const response = await fetch("http://aeroduel.local:45045/api/new-match", { /* todo: use `process.env.PORT | 45045` somehow */
+      const response = await fetch("/api/new-match", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -26,8 +26,12 @@ export default function Home() {
 
       const data = await response.json();
       setLiveMessage("Response: " + JSON.stringify(data));
+      if (data.success === "true")
+        alert("Match open. Scan the QR code or enter the game PIN to enter the match!");
+      console.log("Response: " + JSON.stringify(data));
     } catch (err) {
       setLiveMessage("Error contacting server");
+      alert("Error contacting server");
     }
 
     timeoutRef.current = window.setTimeout(() => {
