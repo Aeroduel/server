@@ -10,7 +10,11 @@ export function generateGamePin(): string {
 // Generate unique match ID
 export function generateMatchId(): string {
   return randomBytes(16).toString("hex");
-  // todo: avoid ID collisions
+}
+
+// Generate an authentication token for an individual plane/ESP32
+export function generateAuthToken(): string {
+  return randomBytes(32).toString("hex");
 }
 
 // Get local IP address
