@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
 import {
   getCurrentMatch,
-  joinPlaneToMatch,
+  joinPlaneToMatch, setPlaneAuthToken, setUserAuthToken,
   validatePlaneAuthToken
 } from "@/lib/match-state";
+import { generateAuthToken } from "@/lib/utils";
 
 export async function POST(req: Request) {
   let data;
@@ -13,12 +14,12 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
 
-  const { authToken, gamePin, planeId, playerName, userId } = data;
+  const { gamePin, planeId, playerName, userId } = data;
   // TODO: Decide whether to use a custom playerName, generate a name (i.e. Bravo-5 or Player 1), or not use it at all.
 
-  if (!authToken || !gamePin || !planeId /*|| !playerName*/ || !userId) {
+  if (!gamePin || !planeId /*|| !playerName*/ || !userId) {
     return NextResponse.json(
-      { error: "Missing required fields: authToken, gamePin, planeId, and userId." },
+      { error: "Missing required fields: gamePin, planeId, and userId." },
       { status: 400 }
     );
   }
@@ -56,15 +57,8 @@ export async function POST(req: Request) {
     );
   }
 
-  // Validate authToken against the one generated in /api/register
-  const isValidToken = validatePlaneAuthToken(match.matchId, planeId, authToken);
-  if (!isValidToken) {
-    return NextResponse.json(
-      { error: "Invalid auth token for this plane." },
-      { status: 401 }
-    );
-  }
-
+  // Generate a new auth token for this session
+  const authToken = generateAuthToken();
   const success = joinPlaneToMatch(gamePin, planeId, playerName);
 
   if (!success) {
@@ -74,7 +68,12 @@ export async function POST(req: Request) {
     );
   }
 
+  // Store the auth token securely on the server, mapped to matchId + planeId
+  setUserAuthToken(match.matchId, userId, authToken);
+
   return NextResponse.json({
-    success: true
+    success: true,
+    authToken: authToken,
+    matchId: match.matchId,
   });
 }

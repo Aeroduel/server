@@ -1,9 +1,12 @@
 import { MatchState, RegisteredPlane } from "@/types";
+import is from "@sindresorhus/is";
+import undefined = is.undefined;
 
 let currentMatch: MatchState | null = null;
 
 // In-memory auth token store, scoped by matchId + planeId
 const planeAuthTokens = new Map<string, string>();
+const userAuthTokens = new Map<string, string>();
 
 // Return current match state
 export function getCurrentMatch() {
@@ -23,9 +26,55 @@ export function updateCurrentMatch(
     (currentMatch && previousMatch && currentMatch.matchId !== previousMatch.matchId)
   ) {
     planeAuthTokens.clear();
+    userAuthTokens.clear();
   }
 
   return currentMatch;
+}
+
+export function registerHit(planeId: string, targetId: string, timestamp: Date): boolean {
+  try {
+    if (!currentMatch)
+      return false;
+
+    // Record hit event
+    if (!currentMatch.events) {
+      currentMatch.events = [];
+    }
+    currentMatch.events.push({
+      type: 'hit',
+      planeId,
+      targetId,
+      timestamp
+    });
+
+    // Initialize matchPlanes if needed
+    if (!currentMatch.matchPlanes) {
+      currentMatch.matchPlanes = new Map();
+    }
+
+    // Update attacker stats
+    if (!currentMatch.matchPlanes.has(planeId)) {
+      currentMatch.matchPlanes.set(planeId, {
+        hits: 0, hitsTaken: 0
+      });
+    }
+
+    const attackerStats = currentMatch.matchPlanes.get(planeId)!;
+    attackerStats.hits++;
+
+    // Update target stats
+    if (!currentMatch.matchPlanes.has(targetId)) {
+      currentMatch.matchPlanes.set(targetId, { hits: 0, hitsTaken: 0 });
+    }
+    const targetStats = currentMatch.matchPlanes.get(targetId)!;
+    targetStats.hitsTaken++;
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  } catch (_) {
+    return false;
+  }
+  return true;
 }
 
 export function registerPlane(matchId: string, planeData: RegisteredPlane): boolean {
@@ -61,6 +110,22 @@ export function validatePlaneAuthToken(
 ): boolean {
   const key = `${matchId}:${planeId}`;
   return planeAuthTokens.get(key) === authToken;
+}
+
+// Store/overwrite the auth token for a given user's mobile app in a given match
+export function setUserAuthToken(matchId: string, userId: string, authToken: string): void {
+  const key = `${matchId}:${userId}`;
+  userAuthTokens.set(key, authToken);
+}
+
+// Validate that the provided auth token matches what we stored
+export function validateUserAuthToken(
+  matchId: string,
+  userId: string,
+  authToken: string
+): boolean {
+  const key = `${matchId}:${userId}`;
+  return userAuthTokens.get(key) === authToken;
 }
 
 export function joinPlaneToMatch(gamePin: string, planeId: string, playerName: string): boolean {

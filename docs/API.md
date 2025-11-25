@@ -133,6 +133,7 @@ the LoRa connects to the WiFi network.
 **Request Body:**
 ```json
 {
+  "authToken": "some-authentication-token",
   "planeId": "uuid-of-plane",
   "esp32Ip": "192.168.1.101",
   "userId": "uuid-of-linked-user-account-or-null"
