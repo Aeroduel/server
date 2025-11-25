@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getCurrentMatch, registerPlane } from "@/lib/match-state";
+import { getCurrentMatch, registerPlane, setPlaneAuthToken } from "@/lib/match-state";
 import { generateAuthToken } from "@/lib/utils";
 
 export async function POST(req: Request) {
@@ -12,9 +12,9 @@ export async function POST(req: Request) {
 
     const { planeId, esp32Ip, userId } = data;
 
-    if (!planeId || !esp32Ip) {
+    if (!planeId || !esp32Ip || !userId) {
         return NextResponse.json(
-            { error: "Missing required fields: planeId and esp32Ip are required." },
+            { error: "Missing required fields: planeId, esp32Ip, and userId are required." },
             { status: 400 }
         );
     }
@@ -37,9 +37,8 @@ export async function POST(req: Request) {
     const success = registerPlane(match.matchId, {
         planeId,
         esp32Ip,
+        userId,
         registeredAt: new Date(),
-        // In a real implementation, we would store the authToken securely mapped to the planeId
-        // For this implementation, we assume the client manages it
     });
 
     if (!success) {
@@ -49,9 +48,12 @@ export async function POST(req: Request) {
         );
     }
 
+    // Store the auth token securely on the server, mapped to matchId + planeId
+    setPlaneAuthToken(match.matchId, planeId, authToken);
+
     return NextResponse.json({
         success: true,
         authToken: authToken,
-        matchId: match.matchId
+        matchId: match.matchId,
     });
 }

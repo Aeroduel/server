@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getCurrentMatch, joinPlaneToMatch } from "@/lib/match-state";
+import { getCurrentMatch, joinPlaneToMatch, validatePlaneAuthToken } from "@/lib/match-state";
 
 export async function POST(req: Request) {
     let data;
@@ -43,8 +43,14 @@ export async function POST(req: Request) {
         );
     }
 
-    // TODO: Validate authToken against the one generated in /api/register
-    // For now, we trust the flow if the planeId exists in the registry
+    // Validate authToken against the one generated in /api/register
+    const isValidToken = validatePlaneAuthToken(match.matchId, planeId, authToken);
+    if (!isValidToken) {
+        return NextResponse.json(
+            { error: "Invalid auth token for this plane." },
+            { status: 401 }
+        );
+    }
 
     const success = joinPlaneToMatch(gamePin, planeId, playerName);
 
