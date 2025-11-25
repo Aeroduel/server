@@ -1,9 +1,5 @@
 import { NextResponse } from "next/server";
-import {
-  getCurrentMatch,
-  joinPlaneToMatch, setPlaneAuthToken, setUserAuthToken,
-  validatePlaneAuthToken
-} from "@/lib/match-state";
+import { getCurrentMatch, joinPlaneToMatch, setUserAuthToken } from "@/lib/match-state";
 import { generateAuthToken } from "@/lib/utils";
 
 export async function POST(req: Request) {
@@ -17,9 +13,9 @@ export async function POST(req: Request) {
   const { gamePin, planeId, playerName, userId } = data;
   // TODO: Decide whether to use a custom playerName, generate a name (i.e. Bravo-5 or Player 1), or not use it at all.
 
-  if (!gamePin || !planeId /*|| !playerName*/ || !userId) {
+  if (!gamePin || !planeId || !userId || !playerName) {
     return NextResponse.json(
-      { error: "Missing required fields: gamePin, planeId, and userId." },
+      { error: "Missing required fields: gamePin, planeId, userId, and playerName are required." },
       { status: 400 }
     );
   }
