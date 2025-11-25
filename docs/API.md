@@ -10,7 +10,7 @@
   <img src="/public/server-text.svg" alt="Server" width="150" />
   <br />
   <h1>Aeroduel Server API Documentation</h1>
-</div>
+</div>  
 
 ## Overview
 
@@ -395,9 +395,13 @@ Common HTTP status codes:
   - OUTPUT: `{ success, authToken, matchId }`
 
 - `POST /api/hit` - Registers a hit during the match
-    - Only the ESP32s should make requests to this endpoint, as enforced by the auth token.
-    - INPUT: `{ authToken, planeId, targetId, timestamp }`
-    - OUTPUT: `success`
+  - Called by the ESP32s when a plane is shot by another plane.
+  - Only the ESP32s should make requests to this endpoint, as enforced by the auth token.
+  - Validates `planeId` and `targetId` are associated with the same match.
+  - Adds a new `Event` to the match's `events` list`
+  - Updates the `MatchPlane` for the target plane with the hit count
+  - INPUT: `{ authToken, planeId, targetId, timestamp }`
+  - OUTPUT: `success`
 
 ## Future Endpoints
 - `POST /api/start-match` - Begins an Aeroduel match
