@@ -410,10 +410,16 @@ Common HTTP status codes:
   - INPUT: `serverToken` 
   - OUTPUT: `success, match`
 
+- `GET /api/planes` - List online planes
+  - Returns a list of all online planes, including whether they have joined the 
+current match or not and, if the match is ongoing, their current score.
+  - Anyone can make a request to this endpoint. Sensitive info such as auth tokens is excluded
+  - INPUT: none
+  - OUTPUT: `[{ planeId, userId?, playerName, score? }]`
+
 ## Possible Additional Future Endpoints
 - `GET /api/match/:id` - Get match details
 - `DELETE /api/match/:id` - Cancel/end match
-- `GET /api/planes` - List registered planes
 - `GET /api/match/:id/events` - Get match events such as hits
 
 ---
