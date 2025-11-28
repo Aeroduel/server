@@ -172,15 +172,15 @@ Returns the auth token the ESP32 will use for plane-specific requests.
 ### POST `/api/join-match`
 
 Adds a plane to the current match's waiting room.
-Returns the auth token the mobile app will use for mobile-specific requests.
+Returns the auth token the mobile app will use for mobile-specific requests
+during this match.
 
 **Request Body:**
 ```json
 {
-  "gamePin": "123456",
   "planeId": "uuid-of-plane",
-  "userId": "uuid-of-user",
-  "playerName": "Foxtrot-4"
+  "playerName": "Foxtrot-4",
+  "userId": "uuid-of-user"
 }
 ```
 
@@ -409,12 +409,12 @@ Common HTTP status codes:
   - OUTPUT: `{ success, authToken, matchId }`
 
 - `POST /api/join-match` – Adds a plane to the current match's waiting room for a specific player
-  - Called by the mobile app after the plane has been registered
-  - Validates the `gamePin` against the current match and ensures the match is still in `waiting` state
-  - Ensures the requesting `userId` matches the one associated with the plane
+  - Called by the mobile app when a player hits the "join match" button
+  - Ensures the match is still in `waiting` state
+  - Ensures the requesting `userId` matches the one associated with the given `planeId`
   - Enforces the `maxPlayers` limit
   - Associates a `playerName` with that plane for the match and issues a player‑scoped auth token
-  - INPUT: `{ gamePin, planeId, userId, playerName }`
+  - INPUT: `{ planeId, userId, playerName }`
   - OUTPUT: `{ success, authToken, matchId }`
 
 - `POST /api/hit` - Registers a hit during the match
