@@ -386,7 +386,6 @@ const ws = new WebSocket('ws://aeroduel.local:45045');
 ```typescript
 interface MatchState {
   matchId: string;
-  gamePin: string;
   status: "waiting" | "active" | "ended";
   createdAt: Date;
   matchType: "timed";    // future proof; may have multiple game modes in future

@@ -66,7 +66,7 @@ export default function Home() {
       } else if (!response.ok) {
         alert("An unknown error occurred");
       } else if (data.success === true || data.success === "true") {
-        alert("Match open. Scan the QR code or enter the game PIN to enter the match!");
+        alert("Match open. Waiting on players to join...");
       }
 
       console.log("Response: " + JSON.stringify(data));

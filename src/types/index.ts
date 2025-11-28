@@ -1,6 +1,5 @@
 export interface MatchState {
   matchId: string;
-  gamePin: string;
   status: "waiting" | "active" | "ended";
   createdAt: Date;
   matchType: "timed"; // | "scored" | "lives"; // (Stretch goal match types)

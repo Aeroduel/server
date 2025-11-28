@@ -1,12 +1,6 @@
 import { randomBytes } from "crypto";
 import { networkInterfaces } from "os";
 
-// Generate 6-digit game PIN
-export function generateGamePin(): string {
-  return Math.floor(100000 + Math.random() * 900000).toString();
-  // todo: avoid ID collisions
-}
-
 // Generate unique match ID
 export function generateMatchId(): string {
   return randomBytes(16).toString("hex");
