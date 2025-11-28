@@ -146,15 +146,12 @@ Creates a new Aeroduel match in "waiting" state. Requires a server token for aut
 ### POST `/api/register`
 
 Registers that a plane is online. Called when a plane's ESP32 is powered on and
-the LoRa connects to the WiFi network.
+the LoRa connects to the WiFi network.  
 Returns the auth token the ESP32 will use for plane-specific requests.
-
-## Planned Body and Responses
 
 **Request Body:**
 ```json
 {
-  "authToken": "some-authentication-token",
   "planeId": "uuid-of-plane",
   "esp32Ip": "192.168.1.101",
   "userId": "uuid-of-linked-user-account-or-null"
@@ -176,8 +173,6 @@ Returns the auth token the ESP32 will use for plane-specific requests.
 
 Adds a plane to the current match's waiting room.
 Returns the auth token the mobile app will use for mobile-specific requests.
-
-## Planned Body and Responses
 
 **Request Body:**
 ```json
@@ -381,7 +376,7 @@ All endpoints follow this error format:
 Common HTTP status codes:
 - `200` - Success
 - `400` - Bad Request (invalid input)
-- `401` - Unauthenticated (invalid auth token)
+- `401` - Unauthenticated (missing or invalid auth token)
 - `403` - Forbidden (Not authorized to perform this action from this device)
 - `404` - Not Found
 - `409` - Conflict (e.g., match already exists)
@@ -398,21 +393,22 @@ Common HTTP status codes:
 ---
 
 ## Current Endpoints
-- `POST /api/new-match` – Creates a new Aeroduel match in "waiting" state
-  - Uses a server-only token to ensure only the desktop app can create matches
+- `POST /api/new-match` – Creates a new Aeroduel match in waiting state
+  - Uses a server-only token (`SERVER_TOKEN` env var) to ensure only the desktop app can create matches
   - Validates `duration` (30–1800 seconds) and `maxPlayers` (2–16)
-  - Detects the local IP and constructs `serverUrl`, `wsUrl`, and `qrCodeData`
+  - Detects the local IP and constructs `serverUrl`, `wsUrl`, and `qrCodeData` using mDNS hostname (fallback to IP)
+  - Only one match allowed at a time (returns 409 if match already exists)
   - INPUT: `{ serverToken, duration?, maxPlayers? }`
-  - OUTPUT: `{ success, match }` (includes `matchId`, `gamePin`, URLs, QR payload, etc.)
+  - OUTPUT: `{ success, match }` (`match` includes `matchId`, `gamePin`, URLs, QR payload, etc.)
 
 - `POST /api/register` – Registers that a plane is online, but doesn't associate it with the current match yet
-  - Called by the plane’s ESP32 once it is on Wi‑Fi
-  - Registers/updates the plane in the in‑memory `registeredPlanes` list
-  - Generates and stores a per‑match auth token for that `planeId` (used for future plane‑specific requests)
-  - INPUT: `{ planeId, esp32Ip, userId }`
+  - Called by the plane's ESP32 once it is on Wi‑Fi
+  - Registers/updates the plane in the in‑memory `planes` list
+  - Generates and stores a per‑session auth token for that `planeId` (used for future plane‑specific requests)
+  - INPUT: `{ planeId, esp32Ip?, userId? }`
   - OUTPUT: `{ success, authToken, matchId }`
 
-- `POST /api/join-match` – Adds a plane to the current match’s waiting room for a specific player
+- `POST /api/join-match` – Adds a plane to the current match's waiting room for a specific player
   - Called by the mobile app after the plane has been registered
   - Validates the `gamePin` against the current match and ensures the match is still in `waiting` state
   - Ensures the requesting `userId` matches the one associated with the plane
