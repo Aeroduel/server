@@ -263,22 +263,20 @@ Returns a list of all registered planes, including their current match status an
 
 **Success Response (200):**
 ```json
-{
-  "planes": [
-    {
-      "planeId": "uuid-of-plane",
-      "userId": "uuid-of-user",
-      "esp32Ip": "192.168.1.101",
-      "playerName": "Foxtrot-4",
-      "registeredAt": "2025-11-28T12:00:00Z",
-      "hits": 3,
-      "hitsTaken": 1,
-      "isOnline": true,
-      "isJoined": true,
-      "isDisqualified": false
-    }
-  ]
-}
+[
+  {
+    "planeId": "uuid-of-plane",
+    "userId": "uuid-of-user",
+    "esp32Ip": "192.168.1.101",
+    "playerName": "Foxtrot-4",
+    "registeredAt": "2025-11-28T12:00:00Z",
+    "hits": 3,
+    "hitsTaken": 1,
+    "isOnline": true,
+    "isJoined": true,
+    "isDisqualified": false
+  }
+]
 ```
 
 **Response Fields:**
@@ -297,7 +295,38 @@ Returns a list of all registered planes, including their current match status an
 - Returns all registered planes regardless of online/match status
 - Sensitive data like auth tokens is excluded from response
 - Scores (`hits`, `hitsTaken`) only meaningful during active matches
-- Planes persist in memory until server restart
+- Planes persist in memory until the server restarts
+
+### POST `/api/fire`
+This is a joke endpoint that does not fire any shots; instead, it returns error 418: "I'm a Teapot."
+
+**Request Body:**
+```json
+{
+  "planeId": "uuid-of-this-plane",
+  "targetId": "uuid-of-hit-plane"
+}
+```
+
+**Success Response (200):**
+Impossible
+
+**Error Responses:**
+
+**400 - Invalid JSON**
+```json
+{
+  "error": "Invalid JSON"
+}
+```
+
+**418 - I'm a Teapot**
+```json
+{
+  "error": "I'm a server, not a fighter jet. You expect ME to fire at that plane? That's like asking a teapot to brew coffee!"
+}
+```
+
 
 ---
 
@@ -355,15 +384,13 @@ const ws = new WebSocket('ws://aeroduel.local:45045');
 
 ### MatchState
 ```typescript
-{
+interface MatchState {
   matchId: string;
-  gamePin: string;
   status: "waiting" | "active" | "ended";
   createdAt: Date;
-  matchType: "timed";
-  duration: number; // in seconds
-  registeredPlanes: RegisteredPlane[];
-  matchPlanes: Map<string, MatchPlane>;
+  matchType: "timed";    // future proof; may have multiple game modes in future
+  duration: number;      // match duration in seconds
+  matchPlanes: string[]; // planeIds of planes that have joined the match
   maxPlayers: number;
   serverUrl: string;
   wsUrl: string;
@@ -371,31 +398,33 @@ const ws = new WebSocket('ws://aeroduel.local:45045');
 }
 ```
 
-### RegisteredPlane
+### Plane
 ```typescript
-{
-  planeId: string;
+interface Plane {
+  /* Registration info */
   esp32Ip?: string;
-  playerName?: string;
+  planeId: string;
   userId: string;
+  playerName?: string;
   registeredAt: Date;
-}
-```
 
-### MatchPlane
-```typescript
-{
-  hits: number;
-  hitsTaken: number;
+  /* Match info */
+  hits?: number;
+  hitsTaken?: number;
+
+  /* Misc booleans */
+  isOnline: boolean;
+  isJoined: boolean;
+  isDisqualified: boolean;
 }
 ```
 
 ### Event
 ```typescript
-{
-  type: "hit";
+interface Event {
+  type: "join" | "leave" | "hit" | "disqualify";
   planeId: string;
-  targetId: string;
+  targetId?: string; // for hit events
   timestamp: Date;
 }
 ```
@@ -406,10 +435,11 @@ const ws = new WebSocket('ws://aeroduel.local:45045');
 
 ### Match Flow
 1. **Create Match** - Desktop app calls `/api/new-match`
-2. **Registration** - Players scan QR or enter game PIN; mobile app calls `/api/join-match`
+2. **Registration** - Players click the join button in the mobile app, which calls `/api/join-match`
 3. **Start Match** - When ready, desktop app calls `/api/start-match`
 4. **Gameplay** - ESP32s report hits via `/api/hit`, server broadcasts updates via WebSocket
-5. **End Match** - Timer expires, server calculates winner and broadcasts results
+5. **Admin Controls** - In the event of a crash or cheating player, the desktop app can disqualify a player. It can also end a match early. Potential future controls are pausing a match, adjusting scores, and changing the time left.
+6. **End Match** - Timer expires, and the server calculates the winner and broadcasts results
 
 ### Scoring (Timed Mode) 
 - Each hit on another plane: +1 point
@@ -434,6 +464,8 @@ Common HTTP status codes:
 - `403` - Forbidden (Not authorized to perform this action from this device)
 - `404` - Not Found
 - `409` - Conflict (e.g., match already exists)
+- `410` - Gone (e.g., match already ended)
+- `418` - I'm a Teapot (not a coffee machine)
 - `500` - Server Error
 
 ---
@@ -476,6 +508,11 @@ Common HTTP status codes:
     - Anyone can make a request to this endpoint.
     - INPUT: none
     - OUTPUT: `{ planes: [{ planeId, userId?, esp32Ip?, playerName?, registeredAt, hits, hitsTaken, isOnline, isJoined, isDisqualified }] }`
+
+- `POST /api/fire` - Does not fire any shots and instead returns error 418: "I'm a Teapot"
+    - This is a joke endpoint.
+    - INPUT: `{ planeId, targetId }`
+    - OUTPUT: `{ error: "I'm a server, not a fighter jet. You expect ME to fire at that plane? That's like asking a teapot to brew coffee!" }`
 
 ## Future Endpoints
 - `POST /api/start-match` - Begins an Aeroduel match

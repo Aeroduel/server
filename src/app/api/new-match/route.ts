@@ -3,7 +3,7 @@
 import { NextResponse } from "next/server";
 import { MatchState } from '@/types';
 import { getCurrentMatch, updateCurrentMatch } from '@/lib/match-state';
-import { generateGamePin, generateMatchId, getLocalIpAddress } from "@/lib/utils";
+import { generateMatchId, getLocalIpAddress } from "@/lib/utils";
 
 export async function POST(req: Request) {
   let data;
@@ -29,7 +29,6 @@ export async function POST(req: Request) {
         error: "A match is already in progress",
         existingMatch: {
           matchId: currentMatch.matchId,
-          gamePin: currentMatch.gamePin,
           status: currentMatch.status
         }
       },
@@ -78,16 +77,13 @@ export async function POST(req: Request) {
 
   // Create new match
   const matchId = generateMatchId();
-  const gamePin = generateGamePin();
 
-  currentMatch = updateCurrentMatch(() => ({
+  updateCurrentMatch(() => ({
     matchId,
-    gamePin,
     status: "waiting",
     createdAt: new Date(),
     matchType: "timed",
     duration,
-    onlinePlanes: [],
     maxPlayers,
     serverUrl,
     wsUrl,
@@ -96,14 +92,10 @@ export async function POST(req: Request) {
     events: []
   }));
 
-  const qrCodeData = `aeroduel://join?host=${encodeURIComponent(serverHost)}&port=${port}&pin=${gamePin}`;
-
   return NextResponse.json({
     success: true,
     match: {
       matchId,
-      gamePin,
-      qrCodeData,
       status: "waiting",
       matchType: "timed",
       duration,
@@ -111,7 +103,7 @@ export async function POST(req: Request) {
       serverUrl,
       wsUrl,
       matchPlanes: [],
-      localIp // useful fallback for diagnostic UI / QR payloads
+      localIp // useful fallback for diagnostic UI
     }
   });
 }
