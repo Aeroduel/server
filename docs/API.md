@@ -23,11 +23,23 @@ The Aeroduel Server API handles match creation, plane registration, game state m
 
 ## Authentication
 
+### Server Tokens
 Some endpoints are only accessible when inside the desktop application to prevent external tampering by accessing the browser version at `http://aeroduel.local:45045/`.
-These endpoints require a server token. This token is accessible by importing `getServerToken()` from [src/app/getAuth.ts](/src/app/getAuth.ts) and mut be awaited.
-In the future, the onboard ESP32s will require an auth token for endpoints relating to the game (`POST /api/hit` for example).
-This auth token is given to the ESP32 in the response to `POST /api/register`. Each plane will be given a different auth token
-for each different match.
+These endpoints require a server token. This token is accessible by importing `getServerToken()` from [src/app/getAuth.ts](/src/app/getAuth.ts) and must be awaited.
+Only the server and Electron app know the token, which prevents outside tampering via any other source, including the host device unless the request explicitly comes 
+from the Electron app itself. Not even the host device's browser can access the token. The server token is used for endpoints like `POST /api/new-match` or admin controls
+like disqualifying planes during a match.
+
+### Plane Tokens
+The onboard ESP32s also require an auth token for endpoints relating to the game (`POST /api/hit` for example). This auth token is assigned when calling `POST /api/register`.
+Anyone can call api/register, so to prevent bad actors from registering fake planes in order to get an auth token, the user can kick unknown planes from the match lobby
+and disqualify planes during the match (if, for example, the plane crashes or turns out to be a fake plane that registered and is causing trouble). 
+Each plane will be given a different auth token for each different session. A session starts when either the server first opens or when a new match begins, and ends 
+when a new match begins or the server shuts down. 
+
+### User Tokens
+The mobile app also requires an auth token for many of the endpoints it needs to use. This auth token is assigned when the users joins a match (`POST /api/join-match`) and 
+is reset when a new match begins.
 
 ---
 
@@ -35,8 +47,7 @@ for each different match.
 
 ### POST `/api/new-match`
 
-Creates a new Aeroduel match in "waiting" state. Requires an encrypted server token,
-which only the server knows. This prevents other entities from creating new matches.
+Creates a new Aeroduel match in "waiting" state. Requires a server token for authentication.
 
 **Request Body:**
 ```json
@@ -48,7 +59,7 @@ which only the server knows. This prevents other entities from creating new matc
 ```
 
 **Validation:**
-- `serverToken`: matches the server token stored in memory once decrypted.
+- `serverToken`: Must match `SERVER_TOKEN` environment variable, which is auto-generated and should not be set manually
 - `duration`: 30-1800 seconds (30 seconds to 30 minutes)
 - `maxPlayers`: 2-16 players (you probably shouldn't increase this limit, just to keep the game safe)
 
@@ -59,18 +70,23 @@ which only the server knows. This prevents other entities from creating new matc
   "match": {
     "matchId": "a1b2c3d4e5f6...",
     "gamePin": "123456",
+    "qrCodeData": "aeroduel://join?host=aeroduel.local&port=45045&pin=123456",
     "status": "waiting",
     "matchType": "timed",
     "duration": 420,
     "maxPlayers": 2,
     "serverUrl": "http://aeroduel.local:45045",
     "wsUrl": "ws://aeroduel.local:45045",
-    "qrCodeData": "aeroduel://join?host=aeroduel.local&port=45045&pin=123456",
-    "registeredPlanes": [],
+    "matchPlanes": [],
     "localIp": "192.168.1.5"
   }
 }
 ```
+
+**Server Discovery:**
+- Prefers mDNS hostname (`aeroduel.local`) for URLs
+- Falls back to local IP address when mDNS unavailable
+- Port defaults to 45045 (configurable via `PORT` env var)
 
 **Error Responses:**
 
@@ -95,7 +111,14 @@ which only the server knows. This prevents other entities from creating new matc
 }
 ```
 
-**409 - A match already exists**
+**403 - Unauthorized**
+```json
+{
+  "error": "Unauthorized"
+}
+```
+
+**409 - Match already exists**
 ```json
 {
   "error": "A match is already in progress",
@@ -113,6 +136,10 @@ which only the server knows. This prevents other entities from creating new matc
   "error": "Could not detect local IP address. Ensure you're connected to WiFi."
 }
 ```
+
+**Notes:**
+- Only one match can exist on the server at a time
+- Attempting to create a match while one is active (not "ended") returns 409
 
 ---
 
@@ -433,4 +460,4 @@ Common HTTP status codes:
 ---
 
 **Documentation Created**: November 21, 2025  
-**Last Updated**: November 25, 2025
+**Last Updated**: November 28, 2025
