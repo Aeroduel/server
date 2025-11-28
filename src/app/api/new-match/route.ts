@@ -78,13 +78,12 @@ export async function POST(req: Request) {
   // Create new match
   const matchId = generateMatchId();
 
-  currentMatch = updateCurrentMatch(() => ({
+  updateCurrentMatch(() => ({
     matchId,
     status: "waiting",
     createdAt: new Date(),
     matchType: "timed",
     duration,
-    onlinePlanes: [],
     maxPlayers,
     serverUrl,
     wsUrl,
