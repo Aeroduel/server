@@ -72,13 +72,15 @@ Implement a WebSocket connection with the mobile app and ESP32s. This allows
 the server to send updates to the mobile app when a plane hits the target and
 send commands to the planes, for example, to flash their lights or tell them 
 they've been hit. WebSockets also allows the server to assume the plane has 
-been powered off if it looses the WebSocket connection for more than a few
+been powered off if it loses the WebSocket connection for more than a few
 seconds.
 
 ---
 
 ## Next steps
 
+- Fix bug where plane auth tokens stop working when a match waiting room is created (probably partly intentional; needs to tell the ESP32s the new auth token when a match begins.)
+- Fix bug where api/hit can be called while match state is "waiting" and when the plane has not yet joined
 - Add an endpoint for configuring a match if it hasn't started yet\*
 - Add an endpoint for force ending a match\*
 - Create a WebSocket server
