@@ -648,4 +648,4 @@ Arduino-only endpoints: Only the ESP32s can make requests to this endpoint, and 
 ---
 
 **Documentation Created**: November 21, 2025  
-**Last Updated**: November 29, 2025
+**Last Updated**: December 1, 2025
