@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import {
-  getCurrentMatch, getOnlinePlanes, getSessionId,
+  getCurrentMatch, getJoinedPlanes, getOnlinePlanes, getSessionId,
   registerHit,
   validatePlaneAuthToken
 } from "@/lib/match-state";
@@ -42,7 +42,7 @@ export async function POST(req: Request) {
   }
 
   // get online planes
-  const onlinePlanes = getOnlinePlanes();
+  const matchPlanes = getJoinedPlanes();
 
   // Validate authToken against the one generated in /api/register
   const isValidToken = validatePlaneAuthToken(getSessionId(), planeId, authToken);
@@ -54,7 +54,7 @@ export async function POST(req: Request) {
   }
 
   // Validate targetId is a valid planeId in the current match
-  const targetPlane = onlinePlanes.find(p => p.planeId === targetId);
+  const targetPlane = matchPlanes.find(p => p.planeId === targetId);
   if (!targetPlane) {
     return NextResponse.json(
       { error: "Target plane is not in this match." },
@@ -63,7 +63,7 @@ export async function POST(req: Request) {
   }
 
   // Validate planeId is a valid planeId in the current match and not targetId
-  const plane = onlinePlanes.find(p => p.planeId === planeId && p.planeId !== targetId);
+  const plane = matchPlanes.find(p => p.planeId === planeId && p.planeId !== targetId);
   if (!plane) {
     return NextResponse.json(
       { error: "Attacking plane ID is not in this match or is identical to the target plane ID." },
