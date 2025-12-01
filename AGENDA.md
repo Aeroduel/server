@@ -5,8 +5,9 @@ Zytronium's daily agenda for progress on Aeroduel
 ## Monday, December 1st, 2025
 
 ### Base Goals
-- Implement a mobile API simulator just like the arduino simulator
-- Add WebSockets for mobile implementation
+- [X] Implement a mobile API simulator just like the arduino simulator
+- [ ] Fix API bugs
+- [ ] Add WebSockets for mobile implementation
 
 ### Stretch Goals
 - Add WebSockets for arduino implementation
@@ -18,9 +19,9 @@ Zytronium's daily agenda for progress on Aeroduel
 ## Tuesday, December 2nd, 2025
 
 ### Base Goals
-- Add WebSockets for arduino implementation
-- Add a new page in server app for viewing a match waiting room
-- Add a new page in server app for viewing a match in progress
+- [ ] Add WebSockets for arduino implementation
+- [ ] Add a new page in server app for viewing a match waiting room
+- [ ] Add a new page in server app for viewing a match in progress
 
 ### Stretch Goals
 - Add API endpoints for linking planes via mobile app

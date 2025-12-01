@@ -125,7 +125,12 @@ Besides the fact that the application is incomplete, there are a few known issue
 - Some phones, including some or all Android 13 phones, do not support using mDNS to connect to aeroduel.local:45045. 
   This may affect the mobile app's ability to work on some devices. We are unsure if this is something we can fix on our end.
   - Possible workaround we can implement: Buy aeroduel.com (or similar) and send the game PIN to an API running on it. 
-    This would also allow for players to not need to be on the same wifi network anymore. 
+    This would also allow for players to not need to be on the same Wi-Fi network anymore. 
+- `aeroduel.local` unregisters after some time (5–15 minutes) when running in Electron, but only temporarily. This is a major issue that needs to be fixed.
+  - ```
+    aeroduel.local:45045/api/hit:1
+    Failed to load resource: net::ERR_NAME_NOT_RESOLVED
+    ```
 
 ## Project Structure
 

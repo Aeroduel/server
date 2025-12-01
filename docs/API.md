@@ -224,6 +224,27 @@ at least 2 players joined so far.
 
 ---
 
+### POST `/api/end-match`
+
+Ends the current match stored in memory if currently active. Requires the server
+token.
+
+**Request Body:**
+```json
+{
+  "serverToken": "some-server-token"
+}
+```
+
+**Success Response (200):**
+```json
+{
+  "success": true
+}
+```
+
+---
+
 ### POST `/api/kick`
 
 Kicks or disqualifies a plane from the match. Can only be called by the Electron
@@ -595,6 +616,14 @@ Arduino-only endpoints: Only the ESP32s can make requests to this endpoint, and 
   - Only the sever's front-end can make requests to this endpoint, and this is enforced
   - INPUT: `{ serverToken }`
   - OUTPUT: `{ success, endsAt }`
+
+- `POST /api/start-match` - Ends an Aeroduel match
+  - Server-only endpoint
+  - Called by the server app when the match timer expires
+  - Updates the match in memory to be ended and sends WebSocket updates to ESP32s and mobile apps
+  - Only the sever's front-end can make requests to this endpoint, and this is enforced
+  - INPUT: `{ serverToken }`
+  - OUTPUT: `{ success }`
 
 - `POST /api/kick` - Kicks or disqualifies a plane from the match
   - Server-only endpoint

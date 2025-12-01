@@ -23,7 +23,7 @@ export async function POST(req: Request) {
   }
 
   // Check if there's already an active match on this server
-  let currentMatch: MatchState | null = getCurrentMatch();
+  const currentMatch: MatchState | null = getCurrentMatch();
   if (currentMatch && currentMatch.status !== "ended") {
     return NextResponse.json({
         error: "A match is already in progress",
