@@ -10,25 +10,29 @@ Zytronium's daily agenda for progress on Aeroduel
 - [ ] Add WebSockets for mobile implementation
 
 ### Stretch Goals
-- Add WebSockets for arduino implementation
-- Add a new page in server app for viewing a match waiting room
-- Add a new page in server app for viewing a match in progress
-- Add API endpoints for linking planes via mobile app
-- Add more API endpoints for admin controls
+- [ ] Add WebSockets for arduino implementation
+- [ ] Add a new page in server app for viewing a match waiting room
+- [ ] Add a new page in server app for viewing a match in progress
+- [ ] Add API endpoints for linking planes via mobile app
+- [ ] Add more API endpoints for admin controls
 
 ## Tuesday, December 2nd, 2025
 
 ### Base Goals
-- [ ] Add WebSockets for mobile implementation
+- [X] Add WebSockets for mobile implementation
 - [ ] Add WebSockets for arduino implementation
+- [X] Update mobile simulator app to use WebSockets
+- [ ] Update arduino simulator app to use WebSockets
+- [X] Purchase aeroduel.com domain
+- [X] Set up email addresses @aeroduel.com
 
 ### Stretch Goals
 
-- Add a new page in server app for viewing a match waiting room
-- Add a new page in server app for viewing a match in progress
-- Add API endpoints for linking planes via mobile app
-- Add more API endpoints for admin controls
-- Add admin controls to server app UI
+- [ ] Add a new page in server app for viewing a match waiting room
+- [ ] Add a new page in server app for viewing a match in progress
+- [ ] Add API endpoints for linking planes via mobile app
+- [ ] Add more API endpoints for admin controls
+- [ ] Add admin controls to server app UI
 
 ## Wednesday, December 3rd, 2025
 
