@@ -40,7 +40,7 @@ Zytronium's daily agenda for progress on Aeroduel
 - [ ] Add WebSockets for arduino implementation
 - [ ] Update arduino simulator app to use WebSockets
 - [X] Add a new page in server app for viewing a match waiting room
-- [ ] Add a new page in server app for viewing a match in progress
+- [X] Add a new page in server app for viewing a match in progress
 
 ### Stretch Goals
 
