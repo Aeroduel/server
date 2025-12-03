@@ -15,6 +15,7 @@ export default function MatchPage() {
   const [planes, setPlanes] = useState<Plane[]>([]);
   const [events, setEvents] = useState<Event[]>([]);
   const [ending, setEnding] = useState(false);
+  const [kickingId, setKickingId] = useState<string | null>(null);
 
   const timeoutRef = useRef<number | null>(null);
 
@@ -143,6 +144,45 @@ export default function MatchPage() {
     }, 1500);
   }
 
+  async function kickPlane(planeId: string) {
+    if (kickingId) return;
+    setKickingId(planeId);
+
+    try {
+      const token = await getServerToken();
+
+      const response = await fetch("/api/kick", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          planeId,
+          serverToken: token,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.status === 403) {
+        alert(
+          "You are not authorized to kick or disqualify planes from here. Try again in the app.",
+        );
+      } else if (!response.ok) {
+        alert(data.error ?? "Failed to kick or disqualify plane.");
+      } else if (data.success === true || data.success === "true") {
+        alert("Plane has been kicked / disqualified.");
+      }
+
+      console.log("Kick plane response:", JSON.stringify(data));
+    } catch (err) {
+      console.error(err);
+      alert("An unknown error occurred while kicking the plane.");
+    } finally {
+      setKickingId(null);
+    }
+  }
+
   useEffect(() => {
     return () => {
       if (timeoutRef.current) {
@@ -175,7 +215,7 @@ export default function MatchPage() {
   return (
     <main
       role="main"
-      className="w-full max-w-6xl mx-auto p-6 flex flex-col gap-6 min-h-screen"
+      className="w-full px-6 flex flex-col gap-6 min-h-screen"
     >
       <header className="text-center mt-8">
         <Image
@@ -196,43 +236,59 @@ export default function MatchPage() {
         </p>
       </header>
 
-      <div className="flex-1 grid grid-cols-[minmax(180px,1fr)_minmax(320px,1.4fr)_minmax(220px,1.1fr)] gap-6 items-stretch">
+      <div className="flex-1 grid grid-cols-[minmax(0,1.6fr)_minmax(260px,0.8fr)_minmax(0,1.6fr)] gap-6 items-stretch">
         {/* Online planes (left) */}
         <section className="bg-navy/80 backdrop-blur-md border-2 border-skyblue/30 rounded-3xl p-4 flex flex-col shadow-lg shadow-navy/50 overflow-hidden">
           <h2 className="text-xl text-white font-bold mb-2 border-b border-skyblue/20 pb-2 text-center">
             Online Planes
           </h2>
-          <div className="flex-1 overflow-y-auto pr-1 space-y-2">
+          <div className="flex-1 overflow-y-auto pr-1 space-y-4">
             {onlinePlanes.length === 0 && (
               <p className="text-skyblue/60 text-sm text-center mt-4">
                 No planes online.
               </p>
             )}
-            {onlinePlanes.map((plane) => (
-              <div
-                key={plane.planeId}
-                className="rounded-xl border border-skyblue/20 bg-darkernavy/60 px-3 py-2 text-sm flex flex-col gap-0.5"
-              >
-                <div className="flex justify-between items-center">
-                  <span className="font-semibold text-skyblue">
-                    {plane.playerName || "Unlinked Plane"}
-                  </span>
-                  {plane.isJoined && (
-                    <span className="text-xs text-gold font-semibold">
-                      In Match
+            {onlinePlanes.map((plane, index) => {
+              const iconSrc =
+                index % 2 === 0 ? "/plane-right.svg" : "/plane-white-right.svg";
+
+              return (
+                <div
+                  key={plane.planeId}
+                  className="rounded-2xl border border-skyblue/30 bg-gradient-to-r from-darkernavy/90 via-darkernavy/70 to-skyblue/20 px-5 py-4 text-base flex items-center gap-4 shadow-md shadow-navy/60 min-h-[100px]"
+                >
+                  <div className="flex-shrink-0">
+                    <Image
+                      src={iconSrc}
+                      alt="Plane icon"
+                      width={56}
+                      height={56}
+                      className="drop-shadow-[0_0_8px_rgba(56,189,248,0.7)]"
+                    />
+                  </div>
+                  <div className="flex flex-col flex-1 gap-1">
+                    <div className="flex justify-between items-center gap-2">
+                      <span className="font-semibold text-skyblue text-base truncate">
+                        {plane.playerName || "Unlinked Plane"}
+                      </span>
+                      {plane.isJoined && (
+                        <span className="text-sm text-gold font-semibold px-2 py-0.5 rounded-full bg-gold/10">
+                          In Match
+                        </span>
+                      )}
+                    </div>
+                    <span className="text-sm text-skyblue/70 break-all">
+                      ID: {plane.planeId}
                     </span>
-                  )}
+                    {plane.esp32Ip && (
+                      <span className="text-sm text-skyblue/60">
+                        IP: {plane.esp32Ip}
+                      </span>
+                    )}
+                  </div>
                 </div>
-                <span className="text-[11px] text-skyblue/60 break-all">
-                  ID: {plane.planeId}
-                </span>
-                {plane.esp32Ip && (
-                  <span className="text-[11px] text-skyblue/60">
-                    IP: {plane.esp32Ip}
-                  </span>
-                )}
-              </div>
-            ))}
+              );
+            })}
           </div>
         </section>
 
@@ -365,41 +421,71 @@ export default function MatchPage() {
           </div>
         </div>
 
-        {/* Right: live scores */}
+        {/* Right: live scores (keep kick button here) */}
         <section className="bg-navy/80 backdrop-blur-md border-2 border-skyblue/30 rounded-3xl p-4 flex flex-col shadow-lg shadow-navy/50 overflow-hidden">
           <h2 className="text-xl text-white font-bold mb-2 border-b border-skyblue/20 pb-2 text-center">
             Live Scores
           </h2>
-          <div className="flex-1 overflow-y-auto pr-1 space-y-2">
+          <div className="flex-1 overflow-y-auto pr-1 space-y-4">
             {scoreboard.length === 0 && (
               <p className="text-skyblue/60 text-sm text-center mt-4">
                 No players in match.
               </p>
             )}
-            {scoreboard.map((plane, index) => (
-              <div
-                key={plane.planeId}
-                className="rounded-xl border border-skyblue/20 bg-darkernavy/60 px-3 py-2 text-sm flex flex-col gap-0.5"
-              >
-                <div className="flex justify-between items-center">
-                  <span className="font-semibold text-skyblue">
-                    {index + 1}. {plane.playerName || "Unnamed Pilot"}
-                  </span>
-                  {plane.isDisqualified && (
-                    <span className="text-[11px] text-red-400 font-semibold">
-                      DQ
+            {scoreboard.map((plane, index) => {
+              const iconSrc =
+                index % 2 === 0 ? "/plane-right.svg" : "/plane-white-right.svg";
+
+              return (
+                <div
+                  key={plane.planeId}
+                  className="rounded-2xl border border-skyblue/30 bg-gradient-to-r from-darkernavy/90 via-darkernavy/70 to-skyblue/20 px-5 py-4 text-base flex items-center gap-4 shadow-md shadow-navy/60 min-h-[100px]"
+                >
+                  <div className="flex-shrink-0">
+                    <Image
+                      src={iconSrc}
+                      alt="Plane icon"
+                      width={56}
+                      height={56}
+                      className="drop-shadow-[0_0_8px_rgba(251,191,36,0.7)]"
+                    />
+                  </div>
+                  <div className="flex flex-col flex-1 gap-1">
+                    <div className="flex justify-between items-center gap-2">
+                      <span className="font-semibold text-skyblue text-base truncate">
+                        {index + 1}. {plane.playerName || "Unnamed Pilot"}
+                      </span>
+                      <div className="flex items-center gap-1.5">
+                        {plane.isDisqualified && (
+                          <span className="text-xs text-red-400 font-semibold px-2 py-0.5 rounded-full bg-red-900/40">
+                            DQ
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <span className="text-sm text-skyblue/70 break-all">
+                      ID: {plane.planeId}
                     </span>
-                  )}
+                    <div className="flex justify-between text-sm text-skyblue/80 mt-1">
+                      <span>Hits: {plane.hits ?? 0}</span>
+                      <span>Hits Taken: {plane.hitsTaken ?? 0}</span>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => kickPlane(plane.planeId)}
+                    disabled={kickingId === plane.planeId}
+                    className={`ml-2 px-3 py-2 text-sm font-semibold rounded-xl border transition-all ${
+                      kickingId === plane.planeId
+                        ? "border-red-500/40 bg-red-900/40 text-red-200/70 cursor-not-allowed"
+                        : "border-red-500/70 bg-red-900/70 text-red-100 hover:bg-red-700 hover:scale-105 shadow-md"
+                    }`}
+                  >
+                    {kickingId === plane.planeId ? "Kicking..." : "Kick"}
+                  </button>
                 </div>
-                <span className="text-[11px] text-skyblue/60 break-all">
-                  ID: {plane.planeId}
-                </span>
-                <div className="flex justify-between text-[11px] text-skyblue/80 mt-1">
-                  <span>Hits: {plane.hits ?? 0}</span>
-                  <span>Hits Taken: {plane.hitsTaken ?? 0}</span>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </section>
       </div>
