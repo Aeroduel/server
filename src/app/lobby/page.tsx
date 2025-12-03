@@ -270,7 +270,7 @@ export default function LobbyPage() {
       role="main"
       className="w-full px-6 flex flex-col gap-6 min-h-screen"
     >
-      <header className="text-center mt-8">
+      <header className="text-center self-center mt-8">
         <Image
           src="/logo_text.svg"
           alt="Aeroduel"
