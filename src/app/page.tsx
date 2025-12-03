@@ -3,8 +3,10 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import getServerToken from "@/app/getAuth";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
+  const router = useRouter();
   const [loading, setLoading] = useState(false);
   
   // 7 minutes (420 seconds) default, min 30, max 1800
@@ -44,7 +46,6 @@ export default function Home() {
     try {
       // Await the token generation
       const token = await getServerToken();
-      alert(token);
 
       const response = await fetch("/api/new-match", {
         method: "POST",
@@ -66,6 +67,8 @@ export default function Home() {
           alert("A match already exists. Try restarting the app to start a new one");
       } else if (!response.ok) {
         alert("An unknown error occurred");
+      } else if (response.status === 200) {
+        router.push('/lobby');
       } else if (data.success === true || data.success === "true") {
         alert("Match open. Waiting on players to join...");
       }
