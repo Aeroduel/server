@@ -104,9 +104,16 @@ npm run e-build
 * **Open Source:** Built with open source technologies like Next.js, Electron, and Tailwind CSS, well documented, 
   and fully open source. Fork the project and customize it to your heart's content!
 
-## Testing
-While there are no unit tests for this repository ***yet***, there is an arduino simulator GUI to test the ESP32's
-endpoints a plan for the same thing for mobile endpoints as well. You can find this repository [here](https://github.com/Zytronium/aeroduel_arduino_simulator).
+## Testing & Simulators
+
+While there are no unit tests for this repository ***yet***, there are simulator GUIs to test the ESP32's
+and mobile app's endpoints. 
+
+### ESP32 Simulator
+You can find this repository [here](https://github.com/Zytronium/aeroduel_arduino_simulator).
+
+### Mobile Simulator
+You can find this repository [here](https://github.com/Zytronium/aeroduel_mobile_simulator).
 
 ## Modding & Open Source
 

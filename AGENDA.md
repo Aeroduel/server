@@ -49,3 +49,23 @@ Zytronium's daily agenda for progress on Aeroduel
 - [ ] Add API endpoints for linking planes via mobile app
 - [ ] Add more API endpoints for admin controls
 - [ ] Add admin controls to server app UI
+
+## Thursday, December 4th, 2025
+
+### Base Goals
+- [X] Practice Demo Day presentations
+
+### Stretch Goals
+- [X] Add WebSockets for arduino implementation
+- [ ] Update arduino simulator app to use WebSockets
+
+## Friday, December 5th, 2025
+
+### Base Goals
+- [ ] Update arduino simulator app to use WebSockets
+- [ ] Fix server exiting issue
+
+
+
+### Stretch Goals
+- [ ] Add WebSockets for arduino implementation
