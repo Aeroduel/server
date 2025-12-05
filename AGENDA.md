@@ -63,10 +63,17 @@ Zytronium's daily agenda for progress on Aeroduel
 ## Friday, December 5th, 2025
 
 ### Base Goals
-- [ ] Update arduino simulator app to use WebSockets
-- [ ] Fix server exiting issue
-
-
+- [X] Update arduino simulator app to use WebSockets
+- [ ] Add a working match timer
 
 ### Stretch Goals
-- [ ] Add WebSockets for arduino implementation
+- [ ] Fix a ton of bugs
+
+## Saturday, December 6th, 2025
+
+### Base Goals
+- [ ] Bug fixing
+
+### Stretch Goals
+- [ ] Show a end of match results screen when match ends
+- [ ] Get app working on all three major desktop OSes
