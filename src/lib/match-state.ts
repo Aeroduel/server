@@ -85,6 +85,28 @@ export function updateCurrentMatch(
     userAuthTokens.clear();
   }
 
+  // If a match has just transitioned to "ended", kick all joined planes.
+  if (
+    previousMatch &&
+    previousMatch.status !== "ended" &&
+    currentMatch &&
+    currentMatch.status === "ended"
+  ) {
+    // Mark all previously joined planes as no longer joined
+    for (const planeId of previousMatch.matchPlanes) {
+      const plane = getPlaneById(planeId);
+      if (plane) {
+        plane.isJoined = false;
+      }
+    }
+
+    // Clear the joined list on the ended match state
+    currentMatch = {
+      ...currentMatch,
+      matchPlanes: [],
+    };
+  }
+
   return currentMatch;
 }
 
@@ -242,6 +264,31 @@ export function markPlaneOffline(planeId: string): void {
   }
   plane.isOnline = false;
   console.log(`[match-state] Plane ${planeId} went offline (WebSocket closed).`);
+
+  // If this plane is currently part of the match, remove it from matchPlanes
+  // and mark it as no longer joined. Also record a "leave" event.
+  const match = getCurrentMatch();
+  if (!match) return;
+
+  if (match.matchPlanes.includes(planeId)) {
+    plane.isJoined = false;
+
+    updateCurrentMatch((current) => {
+      if (!current) return current;
+
+      const matchPlanes = current.matchPlanes.filter((id) => id !== planeId);
+      const events = current.events ? [...current.events] : [];
+
+      const leaveEvent: Event = {
+        type: "leave",
+        planeId,
+        timestamp: new Date(),
+      };
+      events.push(leaveEvent);
+
+      return { ...current, matchPlanes, events };
+    });
+  }
 }
 
 /**
@@ -286,8 +333,9 @@ function tryAutoDisqualifyAfterDisconnect(planeId: string): void {
 
   console.log(`[match-state] Auto-disqualifying plane ${planeId} after disconnect grace period.`);
   plane.isDisqualified = true;
+  plane.isJoined = false;
 
-  // Record event in match.events
+  // Record event in match.events and remove plane from matchPlanes
   updateCurrentMatch((current) => {
     if (!current) return current;
     const events = current.events ? [...current.events] : [];
@@ -297,7 +345,10 @@ function tryAutoDisqualifyAfterDisconnect(planeId: string): void {
       timestamp: new Date(),
     };
     events.push(disqualifyEvent);
-    return { ...current, events };
+
+    const matchPlanes = current.matchPlanes.filter((id) => id !== planeId);
+
+    return { ...current, events, matchPlanes };
   });
 }
 
