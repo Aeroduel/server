@@ -5,8 +5,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
-    "e-build": "next build; npx electron-builder",
+    "build": "next build; npx electron-builder",
     "dev-build": "cross-env DEV=true electron .",
     "start": "next start",
     "lint": "eslint"
