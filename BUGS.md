@@ -66,6 +66,17 @@ The bug tracker for the Aeroduel Server.
 
 ---
 
+### `timeRemaining` Attribute of Match State in WebSocket `match:update` is Always Null
+![Image from mobile simulator](/markdown%20assets/timeRemainingNull.png)
+
+### Possible Causes
+- Unknown
+
+### Possible Fixes and Workarounds
+- Remove timeRemaining from match:update as it's probably not needed.
+- Find out why it's null and give it a value.
+
+
 ## Future Bugs
 <small>AI autocomplete generated this, and I figured I'd have some fun with it.</small>
 
