@@ -64,6 +64,8 @@ The bug tracker for the Aeroduel Server.
 - Assign an icon (black plane or white plane) to each plane in the list when it goes online.
   - Note: This can cause all planes in a match to have the same icon if every other online plane joins the match. Consider creating more color variants. 
 
+---
+
 ### `timeRemaining` Attribute of Match State in WebSocket `match:update` is Always Null
 ![Image from mobile simulator](/markdown%20assets/timeRemainingNull.png)
 
