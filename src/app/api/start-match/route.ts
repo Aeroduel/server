@@ -45,7 +45,14 @@ export async function POST(req: Request) {
     );
   }
 
-  // We could double-check that match params like duration & max players are inside their limits, but that would be redundant. If figure out a way around the restrictions, then you win. After all, we built Aeroduel to be hacked on.
+  if (currentMatch.matchPlanes.length < 2) {
+    return NextResponse.json(
+      { error: "There must be at least 2 joined players to start the match."},
+      { status: 409 }
+    )
+  }
+
+  // We could double-check that match params like duration & max players are inside their limits, but that would be redundant. If you figured out a way around the restrictions, then you win. After all, we built Aeroduel to be hacked on.
 
   currentMatch = updateCurrentMatch(() => ({
     matchId: currentMatch!.matchId,

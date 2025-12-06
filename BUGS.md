@@ -32,17 +32,6 @@ The bug tracker for the Aeroduel Server.
 
 ---
 
-### Matches Can Begin With Less Than 2 Players Joined
-
-#### Possible Causes
-- I forgot to add a check for this.
-- I added a check for this but it didn't work somehow.
-
-#### Possible Fixes and Workarounds
-- Add or fix the validation check in api/start-match 
-
----
-
 ### App Does Not Return to Main Page After Match Timer Ends
 
 #### Possible Causes
