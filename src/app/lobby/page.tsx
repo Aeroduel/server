@@ -109,14 +109,14 @@ export default function LobbyPage() {
 
       if (response.status === 403) {
         alert(
-          "You are not authorized to start a match from here. Try again in the app.",
+          "You are not authorized to start a match from here. Try again in the app."
         );
       } else if (response.status === 404) {
         alert("There's no current match. Try creating a new match first.");
       } else if (response.status === 409) {
         alert(
           data.error ??
-            "The match is already in progress or cannot be started right now.",
+            "The match is already in progress or cannot be started right now."
         );
       } else if (!response.ok) {
         alert("An unknown error occurred");
@@ -155,7 +155,7 @@ export default function LobbyPage() {
 
       if (response.status === 403) {
         alert(
-          "You are not authorized to kick planes from here. Try again in the app.",
+          "You are not authorized to kick planes from here. Try again in the app."
         );
       } else if (!response.ok) {
         alert(data.error ?? "Failed to kick plane.");
@@ -173,17 +173,20 @@ export default function LobbyPage() {
   }
 
   useEffect(() => {
+    // Allow scrolling on lobby page
+    document.body.style.overflowY = "auto";
     return () => {
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
       }
+      document.body.style.overflowY = "hidden";
     };
   }, []);
 
   const renderPlaneCard = (
     plane: Plane,
     index: number,
-    variant: "online" | "joined",
+    variant: "online" | "joined"
   ) => {
     const iconSrc = getPlaneIcon(index);
     const isKicking = kickingId === plane.planeId;
@@ -234,9 +237,7 @@ export default function LobbyPage() {
           </span>
 
           {variant === "online" && plane.esp32Ip && (
-            <span className="text-sm text-skyblue/60">
-              IP: {plane.esp32Ip}
-            </span>
+            <span className="text-sm text-skyblue/60">IP: {plane.esp32Ip}</span>
           )}
 
           {variant === "joined" && (
@@ -266,168 +267,167 @@ export default function LobbyPage() {
   };
 
   return (
-    <main
-      role="main"
-      className="w-full px-6 flex flex-col gap-6 min-h-screen"
-    >
-      <header className="text-center self-center mt-8">
-        <Image
-          src="/logo_text.svg"
-          alt="Aeroduel"
-          width={493 * 2}
-          height={64 * 2}
-        />
-        <Image
-          src="/server-text.svg"
-          alt="Server"
-          width={270}
-          height={45}
-          className="mt-4 mb-8 mx-auto"
-        />
-        <p className="text-skyblue drop-shadow-[0_1.2px_1.2px_var(--color-navy)]">
-          Aeroduel match hosting server
-        </p>
-      </header>
+    <main role="main" className="w-full px-6 flex flex-col gap-6 min-h-screen">
+      <div className="flex flex-col justify-center items-center flex-1 max-w-[1920px] mx-auto w-full py-6 my-auto">
+        <header className="text-center self-center mb-6">
+          <Image
+            src="/logo_text.svg"
+            alt="Aeroduel"
+            width={493 * 2}
+            height={64 * 2}
+          />
+          <Image
+            src="/server-text.svg"
+            alt="Server"
+            width={270}
+            height={45}
+            className="mt-4 mb-8 mx-auto"
+          />
+          <p className="text-skyblue drop-shadow-[0_1.2px_1.2px_var(--color-navy)]">
+            Aeroduel match hosting server
+          </p>
+        </header>
 
-      <div className="flex-1 grid grid-cols-[minmax(0,1.6fr)_minmax(260px,0.8fr)_minmax(0,1.6fr)] gap-6 items-stretch">
-        {/* Online planes (left) */}
-        <section className="bg-navy/80 backdrop-blur-md border-2 border-skyblue/30 rounded-3xl p-4 flex flex-col shadow-lg shadow-navy/50 overflow-hidden">
-          <h2 className="text-xl text-white font-bold mb-2 border-b border-skyblue/20 pb-2 text-center">
-            Online Planes
-          </h2>
-          <div className="flex-1 overflow-y-auto pr-1 space-y-4">
-            {onlinePlanes.length === 0 && (
-              <p className="text-skyblue/60 text-sm text-center mt-4">
-                No planes online yet.
-              </p>
-            )}
-            {onlinePlanes.map((plane, index) =>
-              renderPlaneCard(plane, index, "online"),
-            )}
-          </div>
-        </section>
-
-        {/* Center: match settings (read-only) + Start Match button */}
-        <div className="flex flex-col items-center justify-center gap-6 w-full">
-          {/* Match Settings (read-only) */}
-          <div className="bg-navy/80 backdrop-blur-md border-2 border-skyblue/30 rounded-3xl p-8 w-full max-w-md flex flex-col gap-6 shadow-lg shadow-navy/50 opacity-80">
-            <h2 className="text-2xl text-white font-bold text-center mb-2 border-b border-skyblue/20 pb-4">
-              Match Settings
+        <div className="flex-1 grid grid-cols-[minmax(0,1.6fr)_minmax(260px,0.8fr)_minmax(0,1.6fr)] gap-6 items-stretch">
+          {/* Online planes (left) */}
+          <section className="bg-navy/80 backdrop-blur-md border-2 border-skyblue/30 rounded-3xl p-4 flex flex-col shadow-lg shadow-navy/50 overflow-hidden">
+            <h2 className="text-xl text-white font-bold mb-2 border-b border-skyblue/20 pb-2 text-center">
+              Online Planes
             </h2>
-
-            {/* Duration Control (disabled) */}
-            <div className="flex flex-row items-center justify-between">
-              <span className="text-lg text-skyblue font-bold uppercase tracking-wider">
-                Match Duration
-              </span>
-              <div className="flex items-center gap-2 bg-darkernavy/50 p-2 rounded-xl border border-skyblue/10">
-                <div className="flex flex-col items-center">
-                  <input
-                    type="number"
-                    min="0"
-                    max="30"
-                    value={displayMinutes}
-                    disabled
-                    onChange={(e) =>
-                      updateDuration(Number(e.target.value), displaySeconds)
-                    }
-                    className="w-16 text-center bg-transparent text-2xl font-mono text-white/70 focus:outline-none appearance-none cursor-not-allowed"
-                  />
-                  <span className="text-xs text-skyblue/60">MIN</span>
-                </div>
-                <span className="text-2xl text-skyblue/50 pb-4">:</span>
-                <div className="flex flex-col items-center">
-                  <input
-                    type="number"
-                    min="0"
-                    max="59"
-                    value={displaySeconds.toString().padStart(2, "0")}
-                    disabled
-                    onChange={(e) =>
-                      updateDuration(displayMinutes, Number(e.target.value))
-                    }
-                    onBlur={() =>
-                      updateDuration(displayMinutes, displaySeconds)
-                    }
-                    className="w-16 text-center bg-transparent text-2xl font-mono text-white/70 focus:outline-none appearance-none cursor-not-allowed"
-                  />
-                  <span className="text-xs text-skyblue/60">SEC</span>
-                </div>
-              </div>
+            <div className="flex-1 overflow-y-auto pr-1 space-y-4">
+              {onlinePlanes.length === 0 && (
+                <p className="text-skyblue/60 text-sm text-center mt-4">
+                  No planes online yet.
+                </p>
+              )}
+              {onlinePlanes.map((plane, index) =>
+                renderPlaneCard(plane, index, "online")
+              )}
             </div>
+          </section>
 
-            {/* Max Players Control (disabled) */}
-            <div className="flex flex-row items-center justify-between">
-              <span className="text-lg text-skyblue font-bold uppercase tracking-wider">
-                Max Players
-              </span>
-              <div className="flex items-center gap-3 bg-darkernavy/50 p-2 rounded-xl border border-skyblue/10 opacity-70">
-                <button
-                  onClick={() => handlePlayersChange(-1)}
-                  disabled
-                  className="w-10 h-10 flex items-center justify-center rounded-lg bg-skyblue/10 text-skyblue text-2xl font-bold cursor-not-allowed opacity-40"
-                >
-                  -
-                </button>
-                <span className="text-2xl font-mono text-white/80 w-8 text-center">
-                  {maxPlayers}
+          {/* Center: match settings (read-only) + Start Match button */}
+          <div className="flex flex-col items-center justify-center gap-6 w-full">
+            {/* Match Settings (read-only) */}
+            <div className="bg-navy/80 backdrop-blur-md border-2 border-skyblue/30 rounded-3xl p-8 w-full max-w-md flex flex-col gap-6 shadow-lg shadow-navy/50 opacity-80">
+              <h2 className="text-2xl text-white font-bold text-center mb-2 border-b border-skyblue/20 pb-4">
+                Match Settings
+              </h2>
+
+              {/* Duration Control (disabled) */}
+              <div className="flex flex-col gap-2">
+                <span className="text-lg text-skyblue font-bold uppercase tracking-wider">
+                  Match Duration
                 </span>
-                <button
-                  onClick={() => handlePlayersChange(1)}
-                  disabled
-                  className="w-10 h-10 flex items-center justify-center rounded-lg bg-skyblue/10 text-skyblue text-2xl font-bold cursor-not-allowed opacity-40"
-                >
-                  +
-                </button>
+                <div className="flex items-center justify-center gap-2 bg-darkernavy/50 p-2 rounded-xl border border-skyblue/10">
+                  <div className="flex flex-col items-center">
+                    <input
+                      type="number"
+                      min="0"
+                      max="30"
+                      value={displayMinutes}
+                      disabled
+                      onChange={(e) =>
+                        updateDuration(Number(e.target.value), displaySeconds)
+                      }
+                      className="w-16 text-center bg-transparent text-2xl font-mono text-white/70 focus:outline-none appearance-none cursor-not-allowed"
+                    />
+                    <span className="text-xs text-skyblue/60">MIN</span>
+                  </div>
+                  <span className="text-2xl text-skyblue/50 pb-4">:</span>
+                  <div className="flex flex-col items-center">
+                    <input
+                      type="number"
+                      min="0"
+                      max="59"
+                      value={displaySeconds.toString().padStart(2, "0")}
+                      disabled
+                      onChange={(e) =>
+                        updateDuration(displayMinutes, Number(e.target.value))
+                      }
+                      onBlur={() =>
+                        updateDuration(displayMinutes, displaySeconds)
+                      }
+                      className="w-16 text-center bg-transparent text-2xl font-mono text-white/70 focus:outline-none appearance-none cursor-not-allowed"
+                    />
+                    <span className="text-xs text-skyblue/60">SEC</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Max Players Control (disabled) */}
+              <div className="flex flex-col gap-2">
+                <span className="text-lg text-skyblue font-bold uppercase tracking-wider">
+                  Max Players
+                </span>
+                <div className="flex items-center justify-center gap-3 bg-darkernavy/50 p-2 rounded-xl border border-skyblue/10 opacity-70">
+                  <button
+                    onClick={() => handlePlayersChange(-1)}
+                    disabled
+                    className="w-10 h-10 flex items-center justify-center rounded-lg bg-skyblue/10 text-skyblue text-2xl font-bold cursor-not-allowed opacity-40"
+                  >
+                    -
+                  </button>
+                  <span className="text-2xl font-mono text-white/80 w-8 text-center">
+                    {maxPlayers}
+                  </span>
+                  <button
+                    onClick={() => handlePlayersChange(1)}
+                    disabled
+                    className="w-10 h-10 flex items-center justify-center rounded-lg bg-skyblue/10 text-skyblue text-2xl font-bold cursor-not-allowed opacity-40"
+                  >
+                    +
+                  </button>
+                </div>
               </div>
             </div>
+
+            {/* Start Match button */}
+            <button
+              type="button"
+              onClick={startMatch}
+              onKeyDown={(e) => {
+                if (e.key === " " || e.key === "Enter") {
+                  e.preventDefault();
+                  startMatch();
+                }
+              }}
+              disabled={starting}
+              aria-pressed={starting}
+              aria-busy={starting}
+              className={`relative transition-all ${
+                !starting
+                  ? "hover:brightness-110 hover:scale-105 cursor-pointer"
+                  : ""
+              }`}
+            >
+              <Image
+                src={starting ? "/starting-btn.svg" : "/start-match-btn.svg"}
+                alt={starting ? "Starting match..." : "Start Match"}
+                width={444}
+                height={102}
+                className={starting ? "opacity-60 backdrop-blur-sm" : ""}
+              />
+            </button>
           </div>
 
-          {/* Start Match button */}
-          <button
-            type="button"
-            onClick={startMatch}
-            onKeyDown={(e) => {
-              if (e.key === " " || e.key === "Enter") {
-                e.preventDefault();
-                startMatch();
-              }
-            }}
-            disabled={starting}
-            aria-pressed={starting}
-            aria-busy={starting}
-            className={`relative transition-all ${
-              !starting
-                ? "hover:brightness-110 hover:scale-105 cursor-pointer"
-                : ""
-            }`}
-          >
-            <Image
-              src={starting ? "/starting-btn.svg" : "/start-match-btn.svg"}
-              alt={starting ? "Starting match..." : "Start Match"}
-              width={444}
-              height={102}
-              className={starting ? "opacity-60 backdrop-blur-sm" : ""}
-            />
-          </button>
+          {/* Joined planes (right) */}
+          <section className="bg-navy/80 backdrop-blur-md border-2 border-skyblue/30 rounded-3xl p-4 flex flex-col shadow-lg shadow-navy/50 overflow-hidden">
+            <h2 className="text-xl text-white font-bold mb-2 border-b border-skyblue/20 pb-2 text-center">
+              Joined Planes
+            </h2>
+            <div className="flex-1 overflow-y-auto pr-1 space-y-4">
+              {joinedPlanes.length === 0 && (
+                <p className="text-skyblue/60 text-sm text-center mt-4">
+                  Waiting for players to join...
+                </p>
+              )}
+              {joinedPlanes.map((plane, index) =>
+                renderPlaneCard(plane, index, "joined")
+              )}
+            </div>
+          </section>
         </div>
-
-        {/* Joined planes (right) */}
-        <section className="bg-navy/80 backdrop-blur-md border-2 border-skyblue/30 rounded-3xl p-4 flex flex-col shadow-lg shadow-navy/50 overflow-hidden">
-          <h2 className="text-xl text-white font-bold mb-2 border-b border-skyblue/20 pb-2 text-center">
-            Joined Planes
-          </h2>
-          <div className="flex-1 overflow-y-auto pr-1 space-y-4">
-            {joinedPlanes.length === 0 && (
-              <p className="text-skyblue/60 text-sm text-center mt-4">
-                Waiting for players to join...
-              </p>
-            )}
-            {joinedPlanes.map((plane, index) =>
-              renderPlaneCard(plane, index, "joined"),
-            )}
-          </div>
-        </section>
       </div>
     </main>
   );
