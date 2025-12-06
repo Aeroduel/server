@@ -1,16 +1,6 @@
 import { NextResponse } from "next/server";
-import { getCurrentMatch, getJoinedPlanes, updateCurrentMatch } from "@/lib/match-state";
-import type { Plane } from "@/types";
-import { broadcastMatchEnd } from "@/lib/websocket";
-
-interface MatchScore {
-  planeId: string;
-  playerName?: string;
-  hits: number;
-  hitsTaken: number;
-  isDisqualified: boolean;
-  isWinner: boolean;
-}
+import { getCurrentMatch } from "@/lib/match-state";
+import { finalizeActiveMatch, cancelMatchEndTimer } from "@/lib/match-timer";
 
 /**
  * POST /api/end-match
@@ -56,75 +46,13 @@ export async function POST(req: Request) {
     return NextResponse.json(
       { error: "The current match has not yet started." },
       { status: 409 }
-    )
+    );
   }
 
-  // Compute scores for all planes that joined this match
-  const joinedPlanes: Plane[] = getJoinedPlanes();
+  // Match is active: end it now.
+  cancelMatchEndTimer();
 
-  const scoredPlanes: MatchScore[] = joinedPlanes.map((plane) => ({
-    planeId: plane.planeId,
-    playerName: plane.playerName,
-    hits: plane.hits ?? 0,
-    hitsTaken: plane.hitsTaken ?? 0,
-    isDisqualified: plane.isDisqualified ?? false,
-    isWinner: false, // filled in below
-  }));
-
-  // Sort by hits desc, then hitsTaken asc, per scoring rules
-  scoredPlanes.sort((a, b) => {
-    if (b.hits !== a.hits) return b.hits - a.hits;
-    if (a.hitsTaken !== b.hitsTaken) return a.hitsTaken - b.hitsTaken;
-    return 0;
-  });
-
-  // Determine winners according to tie rules
-  if (scoredPlanes.length > 0) {
-    const top = scoredPlanes[0];
-    const topHits = top.hits;
-    const topHitsTaken = top.hitsTaken;
-
-    // All planes matching top hits and top hitsTaken share first place (draw)
-    for (const s of scoredPlanes) {
-      if (s.hits === topHits && s.hitsTaken === topHitsTaken) {
-        s.isWinner = true;
-      }
-    }
-  }
-
-  const endedAt = new Date();
-
-  const resultsPayload = {
-    winners: scoredPlanes.filter((p) => p.isWinner).map((p) => p.planeId),
-    scores: scoredPlanes,
-  };
-
-  // Build a match record snapshot suitable for future DB persistence
-/*  const matchRecord = {
-    ...match,
-    status: "ended" as const,
-    endedAt,
-    results: resultsPayload,
-  };*/
-
-  // TODO: Upload matchRecord and match.events to a database (e.g., insert into "matches" and "events" tables/collections)
-
-  // Update in-memory match state to mark it as ended
-  const updatedMatch = updateCurrentMatch((current) => {
-    if (!current || current.matchId !== match.matchId) {
-      return current;
-    }
-
-    return {
-      ...current,
-      status: "ended",
-      // We don't store endedAt on MatchState yet, but it's included in the response
-      events: current.events ?? [],
-    };
-  });
-
-  // Notify clients about final scores
-  broadcastMatchEnd(resultsPayload);
+  const { endedAt, results } = finalizeActiveMatch(match);
 
   return NextResponse.json({
     success: true,
@@ -133,8 +61,6 @@ export async function POST(req: Request) {
       status: "ended",
       endedAt,
     },
-    results: resultsPayload,
-    // For debugging / future DB verification you might inspect matchRecord
-    /*matchRecord,*/
+    results,
   });
 }
