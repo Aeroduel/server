@@ -64,7 +64,7 @@ Zytronium's daily agenda for progress on Aeroduel
 
 ### Base Goals
 - [X] Update arduino simulator app to use WebSockets
-- [ ] Add a working match timer
+- [X] Add a working match timer
 
 ### Stretch Goals
 - [ ] Fix a ton of bugs
