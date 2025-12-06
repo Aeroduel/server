@@ -78,34 +78,32 @@ export function updateCurrentMatch(
   const previousMatch = currentMatch;
   currentMatch = updater(currentMatch);
 
+  // If the match instance changed (new matchId or match cleared), reset
+  // per‑match user tokens.
   if (
     (!currentMatch && previousMatch) ||
     (currentMatch && previousMatch && currentMatch.matchId !== previousMatch.matchId)
   ) {
     userAuthTokens.clear();
-  }
 
-  // If a match has just transitioned to "ended", kick all joined planes.
-  if (
-    previousMatch &&
-    previousMatch.status !== "ended" &&
-    currentMatch &&
-    currentMatch.status === "ended"
-  ) {
-    // Mark all previously joined planes as no longer joined
-    for (const planeId of previousMatch.matchPlanes) {
-      const plane = getPlaneById(planeId);
-      if (plane) {
+    // When a NEW match is created (matchId changes), clear per‑match stats
+    // from all currently online planes so they don't carry scores forward.
+    if (currentMatch && previousMatch && currentMatch.matchId !== previousMatch.matchId) {
+      // Reset per-plane match stats, even for offline planes
+      for (const plane of planes) {
+        plane.hits = 0;
+        plane.hitsTaken = 0;
+        plane.isDisqualified = false;
         plane.isJoined = false;
       }
+      // Clear matchPlanes since its used to track IDs of joined planes
+      currentMatch.matchPlanes = [];
     }
-
-    // Clear the joined list on the ended match state
-    currentMatch = {
-      ...currentMatch,
-      matchPlanes: [],
-    };
   }
+
+  // NOTE: We no longer clear matchPlanes or isJoined flags when a match ends.
+  // This allows the ended match to retain its joined planes for display and
+  // post‑match stats. Per‑match cleanup should happen when a NEW match is created.
 
   return currentMatch;
 }

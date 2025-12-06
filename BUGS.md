@@ -54,15 +54,15 @@ The bug tracker for the Aeroduel Server.
 
 ---
 
-### Match State Does Not Reset On New Match Creation
-(partially fixed)
+### Plane icons in UI are based on position in list rather than ID
 
-#### Possible Causes
-- I forgot to make match state reset on match creation.
-- I made match state reset on match creation but it didn't work somehow.
+#### Cause
+- Plane icons are based on position in list rather than ID.
+  - This causes icons to not stay consistent when planes moved around in the list and causes icons in "Joined Planes" to sometimes not match icons in "Online Planes."
 
-#### Possible Fixes and Workarounds
-- Add a resetMatchState function to utils and call it in api/new-match or api/end-match
+#### Fixes
+- Assign an icon (black plane or white plane) to each plane in the list when it goes online.
+  - Note: This can cause all planes in a match to have the same icon if every other online plane joins the match. Consider creating more color variants. 
 
 ---
 
