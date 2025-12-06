@@ -15,6 +15,7 @@ The bug tracker for the Aeroduel Server.
 #### Possible Fixes and Workarounds
 - On the first http request to server the arduino and mobile app make, return local IP address in the response. Have them use this IP as a fallback when aeroduel.local fails to fetch.
 - Put a similar API on api.aeroduel.com and have devices connect to that instead. This would also require game PINs and better security.
+- Use WebSockets instead of HTTP for all things that would work with WebSockets instead of HTTP requests.
 
 ---
 
@@ -29,17 +30,6 @@ The bug tracker for the Aeroduel Server.
 #### Troubleshooting Options
 - Turn your device off and back on again.
 - Try in docker if MacOS is available in docker.
-
----
-
-### Matches Can Begin With Less Than 2 Players Joined
-
-#### Possible Causes
-- I forgot to add a check for this.
-- I added a check for this but it didn't work somehow.
-
-#### Possible Fixes and Workarounds
-- Add or fix the validation check in api/start-match 
 
 ---
 
@@ -75,6 +65,17 @@ The bug tracker for the Aeroduel Server.
 - Add a resetMatchState function to utils and call it in api/new-match or api/end-match
 
 ---
+
+### `timeRemaining` Attribute of Match State in WebSocket `match:update` is Always Null
+![Image from mobile simulator](/markdown%20assets/timeRemainingNull.png)
+
+### Possible Causes
+- Unknown
+
+### Possible Fixes and Workarounds
+- Remove timeRemaining from match:update as it's probably not needed.
+- Find out why it's null and give it a value.
+
 
 ## Future Bugs
 <small>AI autocomplete generated this, and I figured I'd have some fun with it.</small>
