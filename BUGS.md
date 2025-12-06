@@ -54,21 +54,6 @@ The bug tracker for the Aeroduel Server.
 
 ---
 
-### Match State Does Not Reset On New Match Creation
-(partially fixed)
-
-#### Possible Causes
-- I forgot to make match state reset on match creation.
-- I made match state reset on match creation but it didn't work somehow.
-
-#### Most Likely Cause
-- Scores are no longer part of the match state and are stored separately. Match state does reset, but plane scores do not.
-
-#### Fixes
-- Reset match stats on every plane when match ends or a new one is created.
-
----
-
 ### `timeRemaining` Attribute of Match State in WebSocket `match:update` is Always Null
 ![Image from mobile simulator](/markdown%20assets/timeRemainingNull.png)
 
