@@ -36,8 +36,95 @@ try {
 
 let serverProcess;
 let win;
-let bonjour;
 let publishedService;
+let mdnsRenewalInterval;
+let bonjour;
+
+function publishMDNS(localIp, port, isDev) {
+    if (!localIp) {
+        console.warn("No valid local IPv4 found. mDNS will not be published.");
+        return;
+    }
+
+    if (!BonjourModule) {
+        console.warn("No mDNS library available. mDNS will not be published.");
+        return;
+    }
+
+    try {
+        const bonjourOpts = { interface: localIp };
+        if (typeof BonjourModule === "function") {
+            try { bonjour = new BonjourModule(bonjourOpts); } catch (e) { bonjour = BonjourModule(bonjourOpts); }
+        } else if (BonjourModule && typeof BonjourModule.default === "function") {
+            try { bonjour = new BonjourModule.default(bonjourOpts); } catch (e) { bonjour = BonjourModule.default(bonjourOpts); }
+        } else {
+            bonjour = BonjourModule(bonjourOpts);
+        }
+
+        if (!bonjour || typeof bonjour.publish !== "function") {
+            console.error("bonjour instance does not support publish()");
+            return;
+        }
+
+        const serviceConfig = {
+            name: "AeroDuel Server",
+            type: "http",
+            port: Number(port),
+            host: "aeroduel.local",
+            txt: { path: "/", version: isDev ? "dev" : "prod" }
+        };
+
+        publishedService = bonjour.publish(serviceConfig);
+        console.log(`Published mDNS: aeroduel.local (${localIp}:${port})`);
+
+        // Simple re-publish every 90 seconds - this is the most reliable fix
+        if (mdnsRenewalInterval) clearInterval(mdnsRenewalInterval);
+
+        mdnsRenewalInterval = setInterval(() => {
+            console.log("[mDNS Renewal] Attempting to re-publish service...");
+            try {
+                if (publishedService && typeof publishedService.stop === "function") {
+                    publishedService.stop();
+                }
+            } catch (e) {
+                console.error("[mDNS Renewal] Error stopping old service:", e.message);
+            }
+
+            try {
+                publishedService = bonjour.publish(serviceConfig);
+                console.log("[mDNS Renewal] Service re-published successfully");
+            } catch (e) {
+                console.error("[mDNS Renewal] Error re-publishing:", e.message);
+            }
+        }, 90000); // 90 seconds
+
+    } catch (err) {
+        console.error("Failed to publish mDNS service:", err.message);
+    }
+}
+
+function cleanupMDNS() {
+    if (mdnsRenewalInterval) {
+        clearInterval(mdnsRenewalInterval);
+        mdnsRenewalInterval = null;
+    }
+    try {
+        if (publishedService && typeof publishedService.stop === "function") {
+            publishedService.stop();
+            publishedService = null;
+        }
+    } catch (e) {
+        console.error("Error stopping bonjour service:", e);
+    }
+    try {
+        if (bonjour && typeof bonjour.destroy === "function") {
+            bonjour.destroy();
+            bonjour = null;
+        }
+    } catch (e) {
+        console.error("Error destroying bonjour:", e);
+    }
+}
 
 function getLocalIp() {
     const ifs = os.networkInterfaces();
@@ -147,24 +234,12 @@ async function createWindow() {
         console.error("[server stderr]", d.toString());
     });
 
-    serverProcess.on("exit", (code, signal) => {
-        console.log(`[server exited] code: ${code}, signal: ${signal}`);
-        serverProcess = null;
-        // Unpublish mDNS if published
-        try {
-            if (publishedService && typeof publishedService.stop === "function") {
-                publishedService.stop();
-                publishedService = null;
-            }
-            if (bonjour && typeof bonjour.destroy === "function") {
-                bonjour.destroy();
-                bonjour = null;
-            }
-        } catch (e) {
-            console.error("Error stopping bonjour:", e);
-        }
-        if (win) win.loadURL("data:text/html,<h1>Server exited!</h1>");
-    });
+        serverProcess.on("exit", (code, signal) => {
+            console.log(`[server exited] code: ${code}, signal: ${signal}`);
+            serverProcess = null;
+            cleanupMDNS();
+            if (win) win.loadURL("data:text/html,<h1>Server exited!</h1>");
+        });
 
     // Wait for server to print its host, then load
     setTimeout(() => {
@@ -175,54 +250,6 @@ async function createWindow() {
         // Publish mDNS after loading
         publishMDNS(localIp, port, isDev);
     }, 2000);
-}
-
-function publishMDNS(localIp, port, isDev) {
-    if (!localIp) {
-        console.warn("No valid local IPv4 found. mDNS will not be published.");
-        return;
-    }
-
-    if (!BonjourModule) {
-        console.warn("No mDNS library available. mDNS will not be published.");
-        return;
-    }
-
-    try {
-        // Instantiate bonjour with interface specification
-        const bonjourOpts = { interface: localIp };
-        if (typeof BonjourModule === "function") {
-            try { bonjour = new BonjourModule(bonjourOpts); } catch (e) { bonjour = BonjourModule(bonjourOpts); }
-        } else if (BonjourModule && typeof BonjourModule.default === "function") {
-            try { bonjour = new BonjourModule.default(bonjourOpts); } catch (e) { bonjour = BonjourModule.default(bonjourOpts); }
-        } else {
-            bonjour = BonjourModule(bonjourOpts);
-        }
-
-        if (!bonjour || typeof bonjour.publish !== "function") {
-            console.error("bonjour instance does not support publish()");
-            return;
-        }
-
-        // The key: set the hostname to aeroduel.local in the publish call
-        // This makes the service advertise with that hostname
-        const serviceConfig = {
-            name: "AeroDuel Server",
-            type: "http",
-            port: Number(port),
-            host: "aeroduel.local", // This is the hostname we want to advertise
-            txt: { path: "/", version: isDev ? "dev" : "prod" }
-        };
-
-        try {
-            publishedService = bonjour.publish(serviceConfig);
-            console.log(`Published mDNS: aeroduel.local (${localIp}:${port})`);
-        } catch (e) {
-            console.error("Publishing mDNS service failed:", e);
-        }
-    } catch (err) {
-        console.error("Failed to publish mDNS service:", err);
-    }
 }
 
 app.whenReady().then(() => {
@@ -238,25 +265,14 @@ app.whenReady().then(() => {
     createWindow();
 });
 
-app.on("window-all-closed", () => {
-    if (serverProcess) serverProcess.kill();
-    // cleanup bonjour
-    try {
-        if (publishedService && typeof publishedService.stop === "function") {
-            publishedService.stop();
-            publishedService = null;
-        }
-        if (bonjour && typeof bonjour.destroy === "function") {
-            bonjour.destroy();
-            bonjour = null;
-        }
-    } catch (e) {
-        console.error("Error stopping bonjour:", e);
-    }
-    app.quit();
-});
+    app.on("window-all-closed", () => {
+        if (serverProcess) serverProcess.kill();
+        cleanupMDNS();
+        app.quit();
+    });
 
-process.on("uncaughtException", (err) => {
-    console.error("Uncaught Exception:", err);
-    if (win) win.webContents.openDevTools({ mode: "detach" });
-});
+    process.on("uncaughtException", (err) => {
+        console.error("Uncaught Exception:", err);
+        cleanupMDNS();
+        if (win) win.webContents.openDevTools({ mode: "detach" });
+    });

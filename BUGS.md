@@ -5,20 +5,6 @@ The bug tracker for the Aeroduel Server.
 
 ## Known Bugs
 
-### aeroduel.local unregisters for http requests after a few minutes.
-- It sometimes re-registers after a long while
-- WebSockets seem to work fine.
-
-#### Possible Causes
-- Unknown
-
-#### Possible Fixes and Workarounds
-- On the first http request to server the arduino and mobile app make, return local IP address in the response. Have them use this IP as a fallback when aeroduel.local fails to fetch.
-- Put a similar API on api.aeroduel.com and have devices connect to that instead. This would also require game PINs and better security.
-- Use WebSockets instead of HTTP for all things that would work with WebSockets instead of HTTP requests.
-
----
-
 ### Server either does not build or does not load CSS on MacOS
 
 #### Possible Causes
