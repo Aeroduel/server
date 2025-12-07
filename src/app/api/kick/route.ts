@@ -4,6 +4,7 @@ import {
   getJoinedPlanes,
   kickPlayer
 } from "@/lib/match-state";
+import { notifyPlaneKickedOrDisqualified, broadcastMatchUpdate } from "@/lib/websocket";
 
 export async function POST(req: Request) {
   let data;
@@ -51,6 +52,16 @@ export async function POST(req: Request) {
     // Disqualify if match is active, otherwise just kick
     const disqualified = match.status === "active";
     kickPlayer(planeId, disqualified);
+
+    // Notify plane and all mobile clients
+    notifyPlaneKickedOrDisqualified(
+      planeId,
+      disqualified ? "plane:disqualified" : "plane:kicked",
+      "manual"
+    );
+
+    // Also send updated match state to mobile clients
+    broadcastMatchUpdate();
 
   return NextResponse.json({
     success: true

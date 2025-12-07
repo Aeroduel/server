@@ -486,20 +486,35 @@ export function broadcastMatchStateToPlanes(
 }
 
 /**
- * Notify a single plane that it has been kicked or disqualified.
+ * Notify a plane AND all mobile clients in the match that it has been kicked or disqualified.
  */
 export function notifyPlaneKickedOrDisqualified(
   planeId: string,
   kind: "plane:kicked" | "plane:disqualified",
   reason: "kick" | "disconnect" | "manual",
 ): void {
-  sendToPlane(planeId, {
+  ensureWebSocketServer();
+
+  const match = getCurrentMatch();
+
+  const payload: OutgoingMessage = {
     type: kind,
     data: {
       planeId,
       reason,
     },
-  });
+  };
+
+  // Send to the specific plane
+  sendToPlane(planeId, payload);
+
+  // Also broadcast to all mobile clients in the current match
+  if (match) {
+    broadcast(
+      (c) => c.role === "mobile" && c.matchId === match.matchId,
+      payload,
+    );
+  }
 }
 
 /**
