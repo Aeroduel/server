@@ -46,6 +46,34 @@ Zytronium's daily agenda for progress on Aeroduel
 
 - [ ] Polish WebSockets
 - [ ] Fix WebSockets bugs
+- [ ] Fix more API bugs
 - [ ] Add API endpoints for linking planes via mobile app
 - [ ] Add more API endpoints for admin controls
 - [ ] Add admin controls to server app UI
+
+## Thursday, December 4th, 2025
+
+### Base Goals
+- [X] Practice Demo Day presentations
+
+### Stretch Goals
+- [X] Add WebSockets for arduino implementation
+- [ ] Update arduino simulator app to use WebSockets
+
+## Friday, December 5th, 2025
+
+### Base Goals
+- [X] Update arduino simulator app to use WebSockets
+- [X] Add a working match timer
+
+### Stretch Goals
+- [ ] Fix a ton of bugs
+
+## Saturday, December 6th, 2025
+
+### Base Goals
+- [ ] Bug fixing
+
+### Stretch Goals
+- [ ] Show a end of match results screen when match ends
+- [ ] Get app working on all three major desktop OSes

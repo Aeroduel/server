@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 import { MatchState } from '@/types';
 import { getCurrentMatch, updateCurrentMatch } from '@/lib/match-state';
 import { broadcastMatchUpdate } from "@/lib/websocket";
+import { scheduleMatchEndTimer } from "@/lib/match-timer";
 
 export async function POST(req: Request) {
   let data;
@@ -44,7 +45,14 @@ export async function POST(req: Request) {
     );
   }
 
-  // We could double-check that match params like duration & max players are inside their limits, but that would be redundant. If figure out a way around the restrictions, then you win. After all, we built Aeroduel to be hacked on.
+  if (currentMatch.matchPlanes.length < 2) {
+    return NextResponse.json(
+      { error: "There must be at least 2 joined players to start the match."},
+      { status: 409 }
+    )
+  }
+
+  // We could double-check that match params like duration & max players are inside their limits, but that would be redundant. If you figured out a way around the restrictions, then you win. After all, we built Aeroduel to be hacked on.
 
   currentMatch = updateCurrentMatch(() => ({
     matchId: currentMatch!.matchId,
@@ -56,14 +64,20 @@ export async function POST(req: Request) {
     maxPlayers: currentMatch!.maxPlayers,
     serverUrl: currentMatch!.serverUrl,
     wsUrl: currentMatch!.wsUrl,
-    events: currentMatch!.events
+    events: currentMatch!.events,
   }));
+
+  // Schedule automatic end of match after its duration
+  const endsAt = scheduleMatchEndTimer(
+    currentMatch!.matchId,
+    currentMatch!.duration,
+  );
 
   // Notify all connected mobiles about the new match status/scores
   broadcastMatchUpdate();
 
   return NextResponse.json({
     success: true,
-    endsAt: new Date(Date.now() + currentMatch!.duration * 1000)
+    endsAt,
   });
 }
