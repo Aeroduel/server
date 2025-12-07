@@ -306,30 +306,9 @@ export default function LobbyPage() {
         </p>
       </header>
 
-      <div className="flex-1 grid grid-cols-[minmax(0,1.6fr)_minmax(260px,0.8fr)_minmax(0,1.6fr)] gap-6 items-stretch relative z-10">
-        {/* Online planes (left) */}
-        <section 
-          className="bg-navy/80 backdrop-blur-md border-2 border-red-500/60 rounded-3xl p-5 flex flex-col shadow-xl overflow-hidden"
-          style={{ boxShadow: '0 0 15px rgba(173,0,0,0.4)' }}
-        >
-          <h2 className="text-xl text-white font-bold mb-3 border-b border-skyblue/20 pb-3 text-center tracking-wide">
-            Online Planes
-          </h2>
-          <div className="flex-1 overflow-y-auto pr-1 space-y-3">
-            {onlinePlanes.length === 0 && (
-              <div className="text-center mt-8 py-8">
-                <p className="text-skyblue/70 text-sm font-medium">No planes online yet</p>
-                <p className="text-skyblue/50 text-xs mt-2">Waiting for connections...</p>
-              </div>
-            )}
-            {onlinePlanes.map((plane, index) =>
-              renderPlaneCard(plane, index, "online"),
-            )}
-          </div>
-        </section>
-
-        {/* Center: match settings (read-only) + Start Match button */}
-        <div className="flex flex-col items-center justify-center gap-6 w-full">
+      <div className="flex-1 flex flex-col lg:grid lg:grid-cols-[minmax(0,1.6fr)_minmax(260px,0.8fr)_minmax(0,1.6fr)] gap-6 items-stretch relative z-10">
+        {/* Match settings (first on small screens, center on large) */}
+        <div className="flex flex-col items-center justify-center gap-6 w-full order-1 lg:order-2">
           {/* Match Settings (read-only) */}
           <div 
             className="bg-navy/80 backdrop-blur-md border-2 border-skyblue/30 rounded-3xl p-8 w-full max-w-md flex flex-col gap-6 shadow-xl opacity-90"
@@ -440,9 +419,9 @@ export default function LobbyPage() {
           </button>
         </div>
 
-        {/* Joined planes (right) */}
+        {/* Joined planes (second on small screens, right on large) */}
         <section 
-          className="bg-navy/80 backdrop-blur-md border-2 border-red-500/60 rounded-3xl p-5 flex flex-col shadow-xl overflow-hidden"
+          className="bg-navy/80 backdrop-blur-md border-2 border-red-500/60 rounded-3xl p-5 flex flex-col shadow-xl overflow-hidden order-2 lg:order-3"
           style={{ boxShadow: '0 0 15px rgba(173,0,0,0.4)' }}
         >
           <h2 className="text-xl text-white font-bold mb-3 border-b border-skyblue/20 pb-3 text-center tracking-wide">
@@ -457,6 +436,27 @@ export default function LobbyPage() {
             )}
             {joinedPlanes.map((plane, index) =>
               renderPlaneCard(plane, index, "joined"),
+            )}
+          </div>
+        </section>
+
+        {/* Online planes (third on small screens, left on large) */}
+        <section 
+          className="bg-navy/80 backdrop-blur-md border-2 border-red-500/60 rounded-3xl p-5 flex flex-col shadow-xl overflow-hidden order-3 lg:order-1"
+          style={{ boxShadow: '0 0 15px rgba(173,0,0,0.4)' }}
+        >
+          <h2 className="text-xl text-white font-bold mb-3 border-b border-skyblue/20 pb-3 text-center tracking-wide">
+            Online Planes
+          </h2>
+          <div className="flex-1 overflow-y-auto pr-1 space-y-3">
+            {onlinePlanes.length === 0 && (
+              <div className="text-center mt-8 py-8">
+                <p className="text-skyblue/70 text-sm font-medium">No planes online yet</p>
+                <p className="text-skyblue/50 text-xs mt-2">Waiting for connections...</p>
+              </div>
+            )}
+            {onlinePlanes.map((plane, index) =>
+              renderPlaneCard(plane, index, "online"),
             )}
           </div>
         </section>
