@@ -681,7 +681,7 @@ export default function MatchPage() {
               </h2>
               <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse shadow-[0_0_8px_rgba(74,222,128,0.8)]"></div>
             </div>
-            <div className="flex-1 overflow-y-auto pr-1 space-y-3 md:grid md:grid-cols-3 md:gap-3 md:space-y-0 md:overflow-y-auto lg:grid lg:grid-cols-3 lg:gap-4 lg:space-y-0">
+            <div className="flex-1 overflow-y-auto pr-1 space-y-3 flex md:gap-3 md:space-y-0 md:overflow-y-auto lg:gap-4 lg:space-y-0">
               {onlinePlanes.length === 0 && (
                 <div className="text-center mt-8 py-8 md:col-span-3 lg:col-span-3">
                   <p className="text-skyblue/70 text-sm font-medium mb-1">

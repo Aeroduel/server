@@ -18,8 +18,8 @@
   --accent-3: var(--accent-tertiary);
 
   --scrollbar-bg: #001225;
-  --scrollbar-thumb: var(--accent-tertiary);
-  --scrollbar-thumb-hover: #f2c469;
+  --scrollbar-thumb: var(--accent-secondary);
+  --scrollbar-thumb-hover: #e61010;
 }
 
 @theme inline {
