@@ -123,7 +123,7 @@ have a different file extension depending on your operating system.
   communication with the RC planes during each match to keep live score and run game logic.
 * **Hybrid Architecture:** leverages Next.js "Standalone" mode to bundle a full Node.js server inside a desktop
   executable.
-* **Amazing UI:** Handmade UI elements and animations to create a modern and sleek experience while keeping the UI
+* **Amazing UI:** Handmade UI elements and animations to create a modern and sleek experience while keeping the UX
   simple and intuitive.
 * **Open Source:** Built with open source technologies like Next.js, Electron, and Tailwind CSS, well documented, 
   and fully open source. Fork the project and customize it to your heart's content!
@@ -153,9 +153,9 @@ or otherwise.
 ## Known issues
 Besides the fact that the application is incomplete, there are a few known issues.
 
-- Some phones, including some or all Android 13 phones, do not support using mDNS to connect to aeroduel.local:45045. 
+- Some phones, including some or all Android phones (tested on Android 13 and 16), do not support using mDNS to connect to aeroduel.local:45045. 
   This may affect the mobile app's ability to work on some devices. We are unsure if this is something we can fix on our end.
-  - Possible workaround we can implement: put an API on aeroduel.com and send the game PIN it. 
+  - Possible workaround we can implement: put an API on aeroduel.com and send the game PIN and local IP to it. 
     This would also allow for players to not need to be on the same Wi-Fi network anymore.
 
 This is not a bug on our end. This is a device-specific issue.
@@ -183,8 +183,8 @@ aeroduel_backend/
 - [X] **Plane Registration/Linking** Let users register their planes and link the physical plane's software with the
   local server during a match.
 - [X] **Game Logic Implementation:** Hit processing and score tracking.
-- [ ] **Complete API:** API endpoints for everything required for the game, from linking planes and starting matches to registering hits and disqualifying planes.
-- [ ] **WebSocket Integration:** WebSocket implementation to keep mobile app updated with live scores and game state and send commands to planes.
+- [X] **Complete API:** API endpoints for everything required for the game, from linking planes and starting matches to registering hits and disqualifying planes.
+- [X] **WebSocket Integration:** WebSocket implementation to keep mobile app updated with live scores and game state and send commands to planes.
 
 ## License
 
