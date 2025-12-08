@@ -372,6 +372,44 @@ Semantics:
 
 ---
 
+### 4.4 `match:created`
+
+**Direction:** Server → Mobile  
+**Sent when:** A new match has been created on the server.
+
+**Payload:**
+```json
+{
+  "type": "match:created",
+  "data": {
+    "matchId": "a1b2c3d4e5f6...",
+    "status": "waiting"
+  }
+}
+```
+Fields:
+
+- `matchId`: The newly-created match's ID.
+- `status`: Always `"waiting"` for newly created matches.
+
+Semantics:
+
+- This message is broadcast to *all* connected mobile clients.
+- Its purpose is to notify mobile UIs that a new match is available so they can:
+    - Reset or update their local join/lobby state.
+    - Prompt the user to join the new match.
+    - Fetch the new match's full state via the HTTP API if needed (e.g., GET match info).
+- Because it is broadcast to all mobiles, clients must treat it as informational — it does not force a match change. The client should take explicit action (e.g., show a "New match available" banner and let the user join).
+
+Client recommendations:
+
+- Listen for `match:created` if on the join match screen.
+- On receipt:
+    - Optionally show a non‑intrusive notification (banner/toast) indicating "New match available".
+    - If the user is in a lobby/idle state, offer a quick "Join" action that calls the server join endpoint and then reconnects via WebSocket with the new match's auth token.
+    - Avoid automatically switching the user's active match without explicit consent.
+---
+
 ## 5. Control Events for Planes (Server → Arduino)
 
 Planes are primarily controlled via these messages. They do not send their own
@@ -564,4 +602,4 @@ When a mobile client's WebSocket closes or errors:
 ---
 
 **Documentation Created**: December 5, 2025  
-**Last Updated**: December 5, 2025
+**Last Updated**: December 7, 2025
