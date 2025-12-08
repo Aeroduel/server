@@ -5,6 +5,7 @@ import { MatchState } from '@/types';
 import { getCurrentMatch, updateCurrentMatch } from '@/lib/match-state';
 import { generateMatchId, getLocalIpAddress } from "@/lib/utils";
 import { getWebSocketUrl } from "@/lib/websocket";
+import { broadcastMatchCreated } from "@/lib/websocket";
 
 export async function POST(req: Request) {
   let data;
@@ -94,6 +95,8 @@ export async function POST(req: Request) {
     matchPlanes: [],
     events: []
   }));
+
+  broadcastMatchCreated(matchId);
 
   return NextResponse.json({
     success: true,

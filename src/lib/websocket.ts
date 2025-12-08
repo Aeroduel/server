@@ -74,6 +74,14 @@ interface MatchEnd {
   };
 }
 
+interface MatchCreated {
+    type: "match:created";
+    data: {
+        matchId: string;
+        status: "waiting";
+    };
+}
+
 interface SystemAcknowledge {
   type: "system:ack";
   data: {
@@ -114,8 +122,9 @@ interface PlaneRemoved {
 }
 
 type OutgoingMessage =
-  | MatchUpdate |  PlaneHit  |   MatchEnd    | SystemAcknowledge
-  | SystemError | PlaneFlash | MatchStateMsg |   PlaneRemoved;
+    | MatchUpdate |  PlaneHit  |   MatchEnd    | MatchCreated
+    | SystemError | PlaneFlash | MatchStateMsg | PlaneRemoved
+    | SystemAcknowledge;
 
 // WebSocket port: default to PORT + 1 so we don't collide with HTTP server
 export const WS_PORT = Number(
@@ -325,8 +334,6 @@ function broadcast(
   }
 }
 
-// ... existing code ...
-
 /**
  * Helper for /api/new-match to build wsUrl given a hostname.
  */
@@ -398,6 +405,29 @@ export function broadcastPlaneHit(
     (c) => c.role === "mobile" && c.matchId === match.matchId,
     payload,
   );
+}
+
+/**
+ * Broadcast to all mobile clients that a new match has been created.
+ * This allows them to reset their join state and join the new match.
+ */
+export function broadcastMatchCreated(matchId: string): void {
+    ensureWebSocketServer();
+
+    const payload: OutgoingMessage = {
+        type: "match:created",
+        data: {
+            matchId,
+            status: "waiting",
+        },
+    };
+
+    // Broadcast to ALL mobile clients, regardless of their current matchId
+    // This allows kicked/ended players to know a new match is available
+    broadcast(
+        (c) => c.role === "mobile",
+        payload,
+    );
 }
 
 /**
