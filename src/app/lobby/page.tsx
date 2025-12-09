@@ -26,10 +26,10 @@ export default function LobbyPage() {
   const displayMinutes = Math.floor(duration / 60);
   const displaySeconds = duration % 60;
 
-  const getPlaneIcon = (index: number) =>
-    index % 2 === 0 ? "/plane-right.svg" : "/plane-white-right.svg";
+  const getPlaneIcon = (plane: Plane) =>
+      plane.icon === "WHITE" ? "/plane-white-right.svg" : "/plane-right.svg";
 
-  // Read-only settings
+    // Read-only settings
   const updateDuration = (newMinutes: number, newSeconds: number) => {
     // disabled
   };
@@ -195,7 +195,7 @@ export default function LobbyPage() {
     index: number,
     variant: "online" | "joined"
   ) => {
-    const iconSrc = getPlaneIcon(index);
+    const iconSrc = getPlaneIcon(plane);
     const isKicking = kickingId === plane.planeId;
 
     return (

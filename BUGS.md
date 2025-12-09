@@ -19,18 +19,6 @@ The bug tracker for the Aeroduel Server.
 
 ---
 
-### Plane icons in UI are based on position in list rather than ID
-
-#### Cause
-- Plane icons are based on position in list rather than ID.
-  - This causes icons to not stay consistent when planes moved around in the list and causes icons in "Joined Planes" to sometimes not match icons in "Online Planes."
-
-#### Fixes
-- Assign an icon (black plane or white plane) to each plane in the list when it goes online.
-  - Note: This can cause all planes in a match to have the same icon if every other online plane joins the match. Consider creating more color variants. 
-
----
-
 ### `timeRemaining` Attribute of Match State in WebSocket `match:update` is Always Null
 ![Image from mobile simulator](/markdown%20assets/timeRemainingNull.png)
 

@@ -458,11 +458,10 @@ export default function MatchPage() {
                 )}
                 {scoreboard.slice(0, 3).map((plane, index) => {
                   const rank = index + 1;
-                  const iconSrc =
-                    index % 2 === 0
-                      ? "/plane-right.svg"
-                      : "/plane-white-right.svg";
-                  const rankStyle = getRankStyle(rank);
+                    const iconSrc = plane.icon === "BLACK"
+                        ? "/plane-right.svg"
+                        : "/plane-white-right.svg";
+                    const rankStyle = getRankStyle(rank);
 
                   return (
                     <div
@@ -704,12 +703,11 @@ export default function MatchPage() {
                 </div>
               )}
               {onlinePlanes.map((plane, index) => {
-                const iconSrc =
-                  index % 2 === 0
-                    ? "/plane-right.svg"
-                    : "/plane-white-right.svg";
+                  const iconSrc = plane.icon === "BLACK"
+                      ? "/plane-right.svg"
+                      : "/plane-white-right.svg";
 
-                return (
+                  return (
                   <div
                     key={plane.planeId}
                     className="group rounded-2xl border border-skyblue/30 bg-gradient-to-r from-darkernavy/90 via-darkernavy/70 to-skyblue/20 px-5 py-4 text-base flex flex-col gap-3 shadow-md shadow-navy/60 transition-all duration-300 hover:border-skyblue/50 hover:shadow-lg hover:shadow-skyblue/20"
