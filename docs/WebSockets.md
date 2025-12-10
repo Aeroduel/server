@@ -251,7 +251,6 @@ registered, disqualification, etc.).
   "type": "match:update",
   "data": {
     "status": "active",
-    "timeRemaining": null,
     "scores": [
       {
         "planeId": "plane-1",
@@ -274,9 +273,6 @@ registered, disqualification, etc.).
 Fields:
 
 - `status`: `"waiting" | "active" | "ended"`.
-- `timeRemaining`:
-    - Intended to be the number of seconds left when `status === "active"`.
-    - May be `null` or omitted as an implementation placeholder.
 - `scores`: One entry per plane currently joined in the match:
     - `planeId`: Unique ID for the plane.
     - `playerName` (optional): Display name.

@@ -40,7 +40,6 @@ interface MatchUpdate {
   type: "match:update";
   data: {
     status: "waiting" | "active" | "ended";
-    timeRemaining?: number | null;
     scores: Array<{
       planeId: string;
       playerName?: string;
@@ -368,15 +367,10 @@ export function broadcastMatchUpdate(): void {
     isDisqualified: plane.isDisqualified ?? false,
   }));
 
-  // In the future, when you track endsAt, you can compute this precisely.
-  const timeRemaining =
-    match.status === "active" ? null : undefined; // placeholder
-
   const payload: OutgoingMessage = {
     type: "match:update",
     data: {
       status: match.status,
-      timeRemaining,
       scores,
     },
   };
