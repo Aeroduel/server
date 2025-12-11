@@ -393,9 +393,6 @@ export default function MatchPage() {
               animation: "pulse-logo-glow-red 1.5s ease-in-out infinite",
             }}
           />
-          <p className="text-skyblue drop-shadow-[0_1.2px_1.2px_var(--color-navy)] text-sm">
-            Aeroduel match hosting server
-          </p>
         </header>
 
         {/* HUD-style Countdown Timer */}

@@ -126,9 +126,6 @@ export default function Home() {
             className="mt-4 mb-4 mx-auto drop-shadow-[0_0_10px_rgba(153,207,255,0.3)]"
             style={{ animation: "pulse-logo-glow 3.5s ease-in-out infinite" }}
           />
-          <p className="text-skyblue drop-shadow-[0_1.2px_1.2px_var(--color-navy)] relative z-20">
-            Aeroduel match hosting server
-          </p>
         </header>
 
         <div className="flex flex-1 flex-col items-center justify-center gap-8 w-full">

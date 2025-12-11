@@ -333,9 +333,6 @@ export default function LobbyPage() {
             className="mt-4 mb-8 mx-auto drop-shadow-[0_0_10px_rgba(153,207,255,0.3)]"
             style={{ animation: "pulse-logo-glow 3.5s ease-in-out infinite" }}
           />
-          <p className="text-skyblue drop-shadow-[0_1.2px_1.2px_var(--color-navy)]">
-            Aeroduel match hosting server
-          </p>
         </header>
 
         <div className="flex flex-col lg:grid lg:grid-cols-[minmax(0,1.6fr)_minmax(260px,0.8fr)_minmax(0,1.6fr)] gap-6 items-start relative z-10">
